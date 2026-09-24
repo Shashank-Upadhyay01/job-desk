@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E7A5C">
+<meta name="description" content="Job hunt desk: find jobs, tailor applications, track follow-ups.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Job Desk">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Shashank's Job Desk</title>
+<style>html{-webkit-text-size-adjust:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}input,select,textarea{font-size:16px!important}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --sunk:#E9EDEB; --line:#D5DCD9;
+  --ink:#15212A; --muted:#5A6A70; --accent:#0E7A5C; --accent-ink:#FFFFFF; --accent-soft:#DDEFE8;
+  --warn:#9A6200; --warn-soft:#FBEFD6; --bad:#A83434; --bad-soft:#F7E1E1; --info:#2A5DA8; --info-soft:#E1EAF7;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--bg:#0E1417;--surface:#162025;--sunk:#1C282E;--line:#2A3940;
+  --ink:#E4ECEA;--muted:#93A4A9;--accent:#3FBF93;--accent-ink:#06231A;--accent-soft:#163A30;
+  --warn:#E3AC4A;--warn-soft:#3A2E17;--bad:#E57F7F;--bad-soft:#3D1F21;--info:#7FA8E8;--info-soft:#1C2A40;}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--bg:#0E1417;--surface:#162025;--sunk:#1C282E;--line:#2A3940;
+  --ink:#E4ECEA;--muted:#93A4A9;--accent:#3FBF93;--accent-ink:#06231A;--accent-soft:#163A30;
+  --warn:#E3AC4A;--warn-soft:#3A2E17;--bad:#E57F7F;--bad-soft:#3D1F21;--info:#7FA8E8;--info-soft:#1C2A40;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:20px 60px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(26px,4vw,34px)}
+h2{font-size:20px}
+h3{font-size:16px}
+.muted{color:var(--muted)}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+header.top{display:flex;flex-wrap:nowrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+header.top>div:first-child{min-width:0;flex:1 1 auto}
+.save-state{font-size:12px;color:var(--muted)}
+nav.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+nav.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;font:500 14px var(--body);color:var(--muted);cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+button,.btn{font:500 14px var(--body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button.small{padding:4px 10px;font-size:13px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.55;cursor:default}
+input,select,textarea{font:14px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{resize:vertical;line-height:1.5}
+label{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:500}
+.grid{display:grid;gap:16px}
+.cols-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.form-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.spread{justify-content:space-between}
+/* Today */
+.hero{display:grid;gap:16px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+@media (max-width:720px){.hero{grid-template-columns:1fr}}
+.target{display:flex;gap:18px;align-items:center}
+.ring{width:112px;height:112px;flex:none}
+.ring text{font-family:var(--mono)}
+.big{font-family:var(--display);font-size:40px;line-height:1}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stats div{background:var(--surface);padding:12px 14px}
+.stats b{display:block;font:500 22px var(--mono)}
+.stats span{font-size:12px;color:var(--muted)}
+.bars{display:flex;gap:6px;align-items:end;height:90px;margin-top:10px;position:relative}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:end}
+.bars .b i{display:block;width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.bars .b.low i{background:var(--muted);opacity:.5}
+.bars .b small{font:11px var(--mono);color:var(--muted)}
+.bars .goal{position:absolute;left:0;right:0;border-top:1px dashed var(--warn)}
+.bars .goal span{position:absolute;right:0;top:-16px;font:11px var(--mono);color:var(--warn)}
+.list{display:grid;gap:8px;margin-top:10px}
+.item{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--line);border-radius:10px;flex-wrap:wrap}
+.pill{display:inline-block;font:500 12px var(--body);padding:2px 9px;border-radius:999px;white-space:nowrap}
+.s-Saved{background:var(--sunk);color:var(--muted)}
+.s-Applied{background:var(--info-soft);color:var(--info)}
+.s-Followed{background:var(--warn-soft);color:var(--warn)}
+.s-Interview{background:var(--accent-soft);color:var(--accent)}
+.s-Offer{background:var(--accent);color:var(--accent-ink)}
+.s-Rejected{background:var(--bad-soft);color:var(--bad)}
+.deadline{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden;margin-top:8px}
+.deadline i{display:block;height:100%;background:var(--warn)}
+/* Tracker */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td select{padding:4px 6px;width:auto;font-size:13px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+/* Tailor */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:12px var(--mono);padding:3px 8px;border-radius:6px;border:1px solid var(--line)}
+.chip.hit{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.chip.miss{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.out{white-space:pre-wrap;background:var(--sunk);border-radius:10px;padding:14px;font-size:14px;overflow-wrap:anywhere}
+.outhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 6px}
+.score{font:500 28px var(--mono)}
+/* Find */
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.links a{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);text-decoration:none}
+.links a:hover{border-color:var(--accent)}
+.links a small{display:block;color:var(--muted);font-size:12px}
+.note{font-size:13px;color:var(--muted)}
+.tag{font:11px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:6px}
+.modal{position:fixed;inset:0;background:rgba(10,20,25,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.modal .sheet{background:var(--surface);color:var(--ink);border-radius:14px;max-width:720px;width:100%;max-height:90vh;overflow:auto;padding:18px;display:grid;gap:12px}
+@media (min-width:720px){.modal{align-items:center}}
+.pick{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.pick input{width:auto;margin-top:4px}
+.bell{position:relative;width:40px;height:40px;padding:0;justify-content:center;border-radius:50%}
+.bell svg{width:20px;height:20px}
+.bell .badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font:600 11px/18px var(--body);text-align:center}
+.bell.ring svg{animation:ring .9s ease 2}
+@keyframes ring{0%,100%{transform:rotate(0)}20%{transform:rotate(14deg)}40%{transform:rotate(-12deg)}60%{transform:rotate(8deg)}80%{transform:rotate(-4deg)}}
+@media (max-width:600px){.notif{position:fixed!important;left:16px;right:16px;top:calc(64px + env(safe-area-inset-top,0px));width:auto!important}}
+.notif{position:absolute;right:0;top:48px;width:min(380px,calc(100vw - 32px));max-height:70vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);z-index:40}
+.notif header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+.nitem{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;padding:11px 14px;display:grid;gap:3px}
+.nitem.unread{background:var(--accent-soft)}
+.nitem.p5{border-left:4px solid var(--bad)} .nitem.p4{border-left:4px solid var(--warn)}
+.nitem b{font-size:14px} .nitem span{font-size:13px;color:var(--muted);white-space:pre-wrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;max-width:calc(100vw - 32px);box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14px}
+.toast.urgent{background:var(--bad);color:#fff}
+.banner{padding:10px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:13px;margin-bottom:14px}
+@media (max-width:480px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Shashank's Job Desk</h1>
+      <div class="muted">Find, apply, follow up. Ten applications a day until an offer lands.</div>
+      <div class="save-state" id="saveState" style="margin-top:4px">Loading…</div>
+    </div>
+    <div style="position:relative;flex:none">
+      <button class="bell" id="bellBtn" aria-label="Notifications" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="badge" id="bellCount" hidden>0</span></button>
+      <div class="notif" id="notifPanel" hidden>
+        <header><b>Notifications</b><div class="row"><button class="small" id="notifAlerts" hidden>Turn on alerts</button><button class="small" id="notifRead">Mark all read</button></div></header>
+        <div id="notifList"></div>
+      </div>
+    </div>
+  </header>
+  <div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+  <div class="banner" id="localBanner" hidden>Cloud saving isn't available in this view, so your data is kept in this browser only.</div>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="today" aria-selected="true">Today</button>
+    <button role="tab" data-tab="tracker" aria-selected="false">Applications</button>
+    <button role="tab" data-tab="tailor" aria-selected="false">Tailor an application</button>
+    <button role="tab" data-tab="find" aria-selected="false">Find jobs</button>
+    <button role="tab" data-tab="profile" aria-selected="false">My profile</button>
+  </nav>
+
+  <!-- TODAY -->
+  <section id="tab-today">
+    <div class="panel" id="asstPanel" hidden style="margin-bottom:16px">
+      <div class="row spread"><h3>Assistant</h3><div class="row"><span class="note" id="asstState"></span><button class="small" id="asstPause">Pause</button></div></div>
+      <div class="out" id="asstReport" style="margin-top:10px;max-height:260px;overflow:auto"></div>
+    </div>
+    <div class="panel" id="queuePanel" hidden style="margin-bottom:16px">
+      <h3>Ready for you to apply</h3>
+      <p class="note" style="margin:4px 0 0">Jobs I found and checked on Naukri and LinkedIn, where you have to apply yourself. Open each one, tap Easy Apply or Apply, then tap Done here.</p>
+      <div class="list" id="queueList"></div>
+    </div>
+    <div class="hero">
+      <div class="panel">
+        <div class="target">
+          <svg class="ring" viewBox="0 0 112 112" aria-hidden="true">
+            <circle cx="56" cy="56" r="46" fill="none" stroke="var(--sunk)" stroke-width="10"/>
+            <circle id="ringArc" cx="56" cy="56" r="46" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 56 56)" stroke-dasharray="289" stroke-dashoffset="289"/>
+            <text id="ringText" x="56" y="62" text-anchor="middle" font-size="22" fill="var(--ink)">0/10</text>
+          </svg>
+          <div>
+            <h2>Applications sent today</h2>
+            <p class="muted" id="todayMsg" style="margin:6px 0 6px">Target is 10. Start with the Find jobs tab.</p>
+            <label class="row" style="display:flex;gap:8px;margin:0 0 10px;color:var(--muted)">Daily target<input id="dailyTarget" type="number" min="1" max="100" inputmode="numeric" style="width:80px"> <span class="note">applications</span></label>
+            <div class="row"><button class="primary" data-go="tracker" data-new="1">+ Log an application</button><button data-go="find">Find jobs</button><button class="gm-sync" hidden>Sync from Gmail</button></div>
+            <p class="note gm-status" style="margin:8px 0 0" hidden></p>
+          </div>
+        </div>
+        <h3 style="margin-top:20px">Last 14 days</h3>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <div class="row spread"><h3>6-week sprint</h3><span class="mono muted" id="sprintDay"></span></div>
+          <div class="deadline"><i id="sprintBar" style="width:0"></i></div>
+          <p class="note" id="sprintNote" style="margin:8px 0 0"></p>
+        </div>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="panel" id="repliesPanel" hidden style="grid-column:1/-1"><h3>Replies in your inbox</h3><p class="note" style="margin:4px 0 0">Emails that look like interview calls or rejections. Check each one and update the application.</p><div class="list" id="replyList"></div></div>
+      <div class="panel"><h3>Follow up now</h3><p class="note" style="margin:4px 0 0">Applied 7–30 days ago with no reply. Send a short message to HR or the hiring manager.</p><div class="list" id="followList"></div></div>
+      <div class="panel"><h3>Coming up</h3><p class="note" style="margin:4px 0 0">Interviews and dates you've set.</p><div class="list" id="upList"></div></div>
+    </div>
+  </section>
+
+  <!-- TRACKER -->
+  <section id="tab-tracker" hidden>
+    <div class="panel" id="formPanel" hidden style="margin-bottom:16px">
+      <div class="row spread" style="margin-bottom:12px"><h2 id="formTitle">Log an application</h2><button class="small" id="formClose">Close</button></div>
+      <form id="appForm" class="grid">
+        <div class="form-grid">
+          <label>Company<input id="f-company" required placeholder="e.g. HDFC Bank"></label>
+          <label>Role<input id="f-role" required placeholder="e.g. MIS Executive"></label>
+          <label>Where you found it<select id="f-source"><option>Naukri</option><option>LinkedIn</option><option>Indeed</option><option>foundit</option><option>Company site</option><option>Referral</option><option>WhatsApp / contact</option><option>Walk-in</option><option>Other</option></select></label>
+          <label>Location<input id="f-location" placeholder="Lucknow / Remote"></label>
+          <label>Status<select id="f-status"></select></label>
+          <label>Applied on<input id="f-applied" type="date"></label>
+          <label>Next date (interview / follow-up)<input id="f-next" type="date"></label>
+          <label>Job link<input id="f-link" type="url" placeholder="https://"></label>
+          <label>Contact (HR name, number or email)<input id="f-contact"></label>
+        </div>
+        <label>Notes<textarea id="f-notes" rows="2" placeholder="Salary range, questions asked, who referred you…"></textarea></label>
+        <p class="note" id="dupWarn" style="margin:0;color:var(--warn)" hidden></p>
+        <div class="row"><button class="primary" type="submit" id="formSubmit">Save application</button><button type="button" id="formDelete" class="danger" hidden>Delete</button></div>
+      </form>
+    </div>
+    <div class="row spread" style="margin-bottom:12px">
+      <div class="row"><button class="primary" id="newApp">+ Log an application</button><button class="gm-sync" hidden>Sync from Gmail</button>
+        <select id="filterStatus" style="width:auto"><option value="">All statuses</option></select></div>
+      <div class="row"><input id="search" placeholder="Search company or role" style="max-width:220px"><button id="exportCsv" hidden>Export CSV</button></div>
+    </div>
+    <p class="note gm-status" style="margin:-4px 0 10px" hidden></p>
+    <div class="row" style="margin:-2px 0 12px"><button id="imp-open">Import from pasted text</button><button id="rep-open">Got a reply? Paste it</button></div>
+    <div class="panel grid" id="imp-panel" hidden style="margin-bottom:16px">
+      <div class="row spread"><h3>Import applications from text</h3><button class="small" id="imp-close">Close</button></div>
+      <p class="note" style="margin:0">Paste confirmation emails, or copy the whole "Applied jobs" page from Naukri, LinkedIn or Indeed and paste it here. The AI pulls out each company and role.</p>
+      <textarea id="imp-text" rows="7" placeholder="Paste here…"></textarea>
+      <div class="row"><button class="primary" id="imp-go">Find applications</button></div>
+      <div id="imp-results"></div>
+    </div>
+    <div class="panel grid" id="rep-panel" hidden style="margin-bottom:16px">
+      <div class="row spread"><h3>Reply helper</h3><button class="small" id="rep-close">Close</button></div>
+      <p class="note" style="margin:0">Paste an email or WhatsApp message from a recruiter. The AI says whether it's an interview, a rejection or a question, updates the right application and drafts your reply.</p>
+      <textarea id="rep-text" rows="6" placeholder="Paste the recruiter's message…"></textarea>
+      <div class="row"><button class="primary" id="rep-go">Read it</button></div>
+      <div id="rep-results"></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Company</th><th>Role</th><th>Status</th><th>Applied</th><th>Next date</th><th>Source</th><th></th></tr></thead>
+      <tbody id="appRows"></tbody>
+    </table></div>
+  </section>
+
+  <!-- TAILOR -->
+  <section id="tab-tailor" hidden>
+    <div class="grid cols-2">
+      <div class="panel grid" style="align-content:start">
+        <h2>Paste the job post</h2>
+        <div class="form-grid">
+          <label>Company<input id="t-company" placeholder="Company name"></label>
+          <label>Role<input id="t-role" placeholder="Job title"></label>
+        </div>
+        <label>Job description<textarea id="t-jd" rows="12" placeholder="Paste the full job description here…"></textarea></label>
+        <div class="row">
+          <button class="primary" id="t-go">Write my application</button>
+          <button id="t-ai" hidden>Write with AI</button>
+          <button id="t-log">Log it as applied</button>
+          <button id="t-cv" hidden>Download CV for this job</button>
+        </div>
+        <p class="note" id="t-ainote" style="margin:0">"Write my application" works offline from your profile. "Write with AI" uses the AI you pick in My profile → AI settings.</p>
+      </div>
+      <div class="panel">
+        <div class="row spread"><h2>Match</h2><span class="score" id="t-score">–</span></div>
+        <p class="note" style="margin:4px 0 10px">Skills the post asks for. Green: in your profile. Amber: mentioned in the post but missing from your profile. Add them only if you really have them.</p>
+        <div class="chips" id="t-chips"><span class="muted">Paste a job post to see the match.</span></div>
+        <div id="t-outputs"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIND -->
+  <section id="tab-find" hidden>
+    <div class="panel grid">
+      <h2>Search the job boards</h2>
+      <div class="form-grid">
+        <label>Role<select id="q-role"></select></label>
+        <label>Or type your own<input id="q-custom" placeholder="e.g. Loan Operations Executive"></label>
+        <label>Location<select id="q-loc"></select></label>
+      </div>
+      <div class="links" id="q-links"></div>
+      <p class="note" style="margin:0">Each link opens a fresh search, filtered to recent posts where the site supports it. Open one board, apply to what fits, log each one, move to the next.</p>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h3>Where your background is strongest</h3>
+      <p class="note">Banking operations + analytics + a working software portfolio. Search these first:</p>
+      <div class="chips" id="q-best"></div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="tab-profile" hidden>
+    <div class="panel grid">
+      <div class="row spread"><h2>My profile</h2><div class="row"><button id="p-cv" hidden>Download my CV</button><button class="primary" id="p-save">Save profile</button></div></div>
+      <p class="note" id="p-warn" style="margin:0;color:var(--warn)" hidden></p>
+      <p class="note" style="margin:0">Every generated application is built from this, so keep it accurate. Fill in the blanks in [square brackets].</p>
+      <div class="form-grid">
+        <label>Full name<input id="p-name"></label>
+        <label>Email<input id="p-email"></label>
+        <label>Phone<input id="p-phone"></label>
+        <label>Location<input id="p-location"></label>
+        <label>GitHub / portfolio<input id="p-links"></label>
+        <label>Notice period / availability<input id="p-notice"></label>
+      </div>
+      <label>Headline<input id="p-headline"></label>
+      <label>Summary<textarea id="p-summary" rows="3"></textarea></label>
+      <label>Skills (comma separated)<textarea id="p-skills" rows="2"></textarea></label>
+      <label>Experience (one line per bullet)<textarea id="p-experience" rows="5"></textarea></label>
+      <label>Projects (one line per project)<textarea id="p-projects" rows="5"></textarea></label>
+      <label>Education and training<textarea id="p-education" rows="2"></textarea></label>
+    </div>
+    <div class="panel grid" style="margin-top:16px">
+      <h3>AI settings</h3>
+      <p class="note" style="margin:0">Pick the AI that writes applications, imports pasted text and reads recruiter replies. This is saved on this device only.</p>
+      <label>Which AI<select id="ai-provider"></select></label>
+      <div id="ai-keyrow" class="form-grid" hidden>
+        <label id="ai-baselab">API address<input id="ai-base" placeholder="https://api.x.ai/v1"></label>
+        <label>Model<input id="ai-model"></label>
+        <label id="ai-keylab">API key<input id="ai-key" type="password" autocomplete="off" placeholder="Paste your key"></label>
+      </div>
+      <p class="note" id="ai-help" style="margin:0"></p>
+      <div class="row"><button id="ai-save" class="primary">Save AI settings</button><button id="ai-test">Test it</button><button id="ai-models" hidden>Find models</button></div>
+      <p class="note" id="ai-note" style="margin:0" hidden></p>
+    </div>
+    <div class="panel grid" style="margin-top:16px" id="ntfyPanel" hidden>
+      <h3>Notifications</h3>
+      <p class="note" style="margin:0">The bell shows alerts from your job-hunt assistant or PC agent (the ntfy topic they post to) plus reminders from your own list. Keep the topic private.</p>
+      <label>Notification topic<input id="ntfy-topic" autocomplete="off" placeholder="jobdesk-…"></label>
+      <div class="row"><button class="primary" id="ntfy-save">Save</button><button id="ntfy-perm">Allow alerts on this device</button></div>
+      <p class="note" id="ntfy-note" style="margin:0" hidden></p>
+    </div>
+    <div class="panel grid" style="margin-top:16px">
+      <h3>Backup and moving to another phone</h3>
+      <p class="note" style="margin:0">Saves every application, your profile and settings into one file. Open the Job Desk on the other device, then restore that file there.</p>
+      <div class="row"><button id="bk-save" hidden>Back up all data</button><label class="btn" for="bk-file" style="position:relative;display:inline-flex;color:var(--ink);font-size:14px">Restore from backup<input id="bk-file" type="file" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0"></label></div>
+      <p class="note" id="bk-note" style="margin:0" hidden></p>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="ai-modal" hidden role="dialog" aria-modal="true" aria-labelledby="ai-mtitle">
+  <div class="sheet">
+    <div class="row spread"><h3 id="ai-mtitle">Ask your AI</h3><button class="small" id="ai-mcancel">Cancel</button></div>
+    <p class="note" style="margin:0"><b>1.</b> Copy this request. <b>2.</b> Paste it into any AI app you use. <b>3.</b> Copy its whole answer and paste it below.</p>
+    <textarea id="ai-mprompt" rows="6" readonly></textarea>
+    <div class="row"><button class="primary" id="ai-mcopy">Copy request</button>
+      <a class="btn" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>
+      <a class="btn" href="https://grok.com/" target="_blank" rel="noopener">Grok</a>
+      <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a>
+      <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude</a></div>
+    <label>The AI's answer<textarea id="ai-manswer" rows="7" placeholder="Paste the full answer here…"></textarea></label>
+    <p class="note" id="ai-merr" style="margin:0;color:var(--bad)" hidden></p>
+    <div class="row"><button class="primary" id="ai-muse">Use this answer</button></div>
+  </div>
+</div>
+<script>
+(function(){
+const STATUSES=["Saved","Applied","Followed up","Interview","Offer","Rejected"];
+const SCLASS={"Saved":"Saved","Applied":"Applied","Followed up":"Followed","Interview":"Interview","Offer":"Offer","Rejected":"Rejected"};
+const TGT=()=>Math.max(1,Math.min(100,parseInt(settings.dailyTarget,10)||10));
+const SPRINT_START="2026-09-23", SPRINT_DAYS=42;
+const DEFAULT_PROFILE={
+  name:"Shashank Upadhyay",
+  email:"iamshashank1o1@gmail.com",
+  phone:"[your phone number]",
+  location:"Uttar Pradesh, India (open to Lucknow, Noida, remote)",
+  links:"github.com/Shashank-Upadhyay01",
+  notice:"Available immediately",
+  headline:"Data Analyst & Full-Stack Developer with banking operations experience",
+  summary:"Former bank cashier, accountant and data analyst who builds the software operations teams run on. Built and deployed two production systems used daily by real businesses: a dealership ERP and a bank-branch maturity payout scheduler. Strong in SQL, Python, Power BI and modern web stacks.",
+  skills:"SQL, PostgreSQL, Python, Pandas, Power BI, Excel, Data Analysis, Dashboards, MIS Reporting, React, Next.js, TypeScript, FastAPI, Supabase, Drizzle ORM, Vercel, Git, Machine Learning, Banking Operations, Accounting, Reconciliation, GST",
+  experience:"[Bank / employer name], [City] | Cashier, Accountant, Data Analyst | [Start year] – Sep 2026\nHandled daily cash operations, accounting entries and reconciliations at a bank branch\nBuilt MaturityFlow, a deposit-maturity payout scheduler the branch uses for its daily register, replacing manual Excel tracking\nPrepared reports and analysis from branch data for management",
+  projects:"Dealership Management System: full CRM/ERP live at a dealership in Uttar Pradesh; GST-compliant invoicing, NBFC financing pipeline, role-based access, encrypted data, 48 automated tests\nMaturityFlow (kggnl.in): turns deposit maturity dates into day-by-day payout schedules for a bank branch; Next.js 15, TypeScript, PostgreSQL, Drizzle; deployed on Vercel + Supabase\nPayTrack Pro: React app that extracts structured payment data from UPI/NEFT/RTGS/IMPS screenshots",
+  education:"Imarticus Learning: Data Analytics, Data Science, Machine Learning and Deep Learning\n[Degree, college, year]"
+};
+const ROLES=["Data Analyst","MIS Executive","Power BI Developer","Business Analyst","Python Developer","Full Stack Developer","React Developer","Banking Operations Executive","Credit Analyst","Accounts Executive"];
+const LOCS=["Lucknow","Noida","Varanasi","Kanpur","Delhi","Remote","India"];
+const BEST=["MIS Executive – bank / NBFC","Data Analyst – fintech","Power BI Developer","Operations Analyst – NBFC","Business Analyst – lending","Junior Full Stack Developer"];
+const TERMS=[
+ ["sql",/\bsql\b|mysql|postgres|pl\/sql|t-sql/i],["postgresql",/postgres/i],["python",/\bpython\b/i],["pandas",/pandas/i],["numpy",/numpy/i],
+ ["power bi",/power\s?bi|dax\b/i],["tableau",/tableau/i],["excel",/excel|vlookup|pivot/i],["dashboards",/dashboard/i],["mis reporting",/\bmis\b/i],
+ ["data analysis",/data analy|analytics/i],["statistics",/statistic/i],["machine learning",/machine learning|\bml\b/i],["etl",/\betl\b|data pipeline/i],
+ ["react",/\breact\b/i],["next.js",/next\.?js/i],["javascript",/javascript|\bjs\b/i],["typescript",/typescript/i],["node.js",/node\.?js/i],["fastapi",/fastapi/i],["django",/django/i],["flask",/flask/i],
+ ["rest api",/rest(ful)? api|\bapis?\b/i],["git",/\bgit(hub)?\b/i],["aws",/\baws\b|amazon web/i],["azure",/azure/i],["docker",/docker/i],["html/css",/\bhtml|\bcss/i],
+ ["banking operations",/bank/i],["nbfc / lending",/nbfc|loan|lending|credit/i],["accounting",/account(ing|s)\b|tally|ledger/i],["reconciliation",/reconcil/i],["gst",/\bgst\b/i],["finance",/financ/i],
+ ["communication",/communicat/i],["hindi",/hindi/i],["english",/english/i]
+];
+const NAMES={"sql":"SQL","postgresql":"PostgreSQL","python":"Python","pandas":"Pandas","numpy":"NumPy","power bi":"Power BI","tableau":"Tableau","excel":"Excel","dashboards":"Dashboards","mis reporting":"MIS reporting","data analysis":"Data analysis","statistics":"Statistics","machine learning":"Machine learning","etl":"ETL","react":"React","next.js":"Next.js","javascript":"JavaScript","typescript":"TypeScript","node.js":"Node.js","fastapi":"FastAPI","django":"Django","flask":"Flask","rest api":"REST APIs","git":"Git","aws":"AWS","azure":"Azure","docker":"Docker","html/css":"HTML/CSS","banking operations":"Banking operations","nbfc / lending":"NBFC / lending","accounting":"Accounting","reconciliation":"Reconciliation","gst":"GST","finance":"Finance","communication":"Communication","hindi":"Hindi","english":"English"};
+const nm=k=>NAMES[k]||k;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const todayStr=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+const daysBetween=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000);
+const fmt=s=>s?new Date(s+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"–";
+
+const DEFAULT_SETTINGS={gmailLastSync:"",replies:[],dismissed:[],dailyTarget:10,automationPaused:false};
+let settings={...DEFAULT_SETTINGS};
+let apps=[]; let profile={...DEFAULT_PROFILE}; let db=null; let editingId=null;
+
+/* ---------- storage ---------- */
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function setSave(t){$("saveState").textContent=t}
+async function saveApp(a){
+  a.updatedAt=Date.now();
+  if(db){setSave("Saving…");try{await db.collection("applications").doc(a.id).set(a);setSave("Saved to your account")}catch(e){setSave("Couldn't save: "+(e&&e.message||"try again"))}}
+  else{const i=apps.findIndex(x=>x.id===a.id);if(i>=0)apps[i]=a;else apps.push(a);LS.set("jd-apps",apps);render();setSave(window.claude?"Saved in this browser":"Saved on this device")}
+}
+async function removeApp(id){
+  if(db){try{await db.collection("applications").doc(id).delete();setSave("Deleted")}catch(e){setSave("Couldn't delete")}}
+  else{apps=apps.filter(a=>a.id!==id);LS.set("jd-apps",apps);render()}
+}
+async function saveProfile(p){
+  profile=p;
+  if(db){setSave("Saving…");try{await db.doc("profile/main").set(p);setSave("Profile saved")}catch(e){setSave("Couldn't save profile")}}
+  else{LS.set("jd-profile",p);setSave(window.claude?"Profile saved in this browser":"Profile saved on this device")}
+}
+async function boot(){
+  const local=LS.get("jd-apps"); if(Array.isArray(local))apps=local;
+  const lp=LS.get("jd-profile"); if(lp)profile={...DEFAULT_PROFILE,...lp};
+  const ls=LS.get("jd-settings"); if(ls)settings={...DEFAULT_SETTINGS,...ls};
+  fillProfile(); render(); initDownloads();
+  let d=null;
+  try{d=window.claude&&window.claude.use?await window.claude.use("db"):null}catch(e){d=null}
+  if(!d){const app=!window.claude;$("localBanner").textContent=app?"Your data is saved on this device only. Back it up from My profile regularly, and restore the file on any other phone.":"Cloud saving isn't available in this view, so your data is kept in this browser only.";
+    $("localBanner").hidden=false;setSave(app?"Saved on this device":"Saving in this browser");
+    try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){} initSample(); return}
+  db=d;
+  db.collection("applications").onSnapshot(s=>{apps=s.docs.map(x=>({...x.data(),id:x.id}));render();setSave("Synced")},e=>setSave("Sync paused: "+(e&&e.code||"error")));
+  db.doc("profile/main").onSnapshot(s=>{if(s.exists){profile={...DEFAULT_PROFILE,...s.data()};fillProfile();}});
+  db.collection("queue").onSnapshot(s=>{queue=s.docs.map(x=>({...x.data(),id:x.id}));renderAssistant();if(notifInit)renderNotifs()},()=>{});
+  db.collection("notifications").orderBy("time","desc").limit(50).onSnapshot(s=>{serverNotifs=s.docs.map(x=>({...x.data(),id:"db-"+x.id}));renderNotifs()},()=>{});
+  db.collection("reports").orderBy("date","desc").limit(1).onSnapshot(s=>{report=s.docs[0]?s.docs[0].data():null;renderAssistant()},()=>{});
+  let firstSettings=true;
+  db.doc("settings/main").onSnapshot(s=>{settings={...DEFAULT_SETTINGS,...(s.exists?s.data():{})};render();if(firstSettings){firstSettings=false;initGmail()}});
+  initSample();
+}
+let downloads=null;
+async function initDownloads(){try{downloads=window.claude&&window.claude.use?await window.claude.use("downloads"):null}catch(e){downloads=null}
+  if(!downloads&&!window.claude){downloads={save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data],{type:/\.json$/.test(filename)?"application/json":/\.csv$/.test(filename)?"text/csv":"text/plain"});
+    const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);return{status:"saved"}}}}
+  ["t-cv","p-cv","exportCsv","bk-save"].forEach(i=>$(i).hidden=!downloads)}
+
+/* ---------- tabs ---------- */
+function showTab(t){document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  ["today","tracker","tailor","find","profile"].forEach(x=>$("tab-"+x).hidden=x!==t);try{sessionStorage.setItem("jd-tab",t)}catch(e){}}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{showTab(b.dataset.go);if(b.dataset.new)openForm()});
+
+/* ---------- today ---------- */
+function isSent(a){return a.applied&&a.status!=="Saved"}
+function render(){renderToday();renderTable();renderReplies();renderAssistant();if(notifInit)renderNotifs()}
+let queue=[], report=null;
+$("dailyTarget").onchange=async()=>{const v=Math.max(1,Math.min(100,parseInt($("dailyTarget").value,10)||10));if(v===TGT()&&+settings.dailyTarget===v)return;settings={...settings,dailyTarget:v};await saveSettings();render();setSave(`Daily target set to ${v}`)};
+$("asstPause").onclick=async()=>{settings={...settings,automationPaused:!settings.automationPaused};await saveSettings();render()};
+function renderAssistant(){
+  const on=!!db&&(queue.length||report);
+  $("asstPanel").hidden=!(db&&report); $("queuePanel").hidden=!(db&&queue.some(q=>q.status==="todo"));
+  if(report){$("asstReport").textContent=report.text||"";}
+  $("asstState").textContent=settings.automationPaused?"Paused: I won't apply or send anything":(report?"Last run "+fmt(report.date):"");
+  $("asstPause").textContent=settings.automationPaused?"Resume":"Pause";
+  const todo=queue.filter(q=>q.status==="todo").sort((a,b)=>(b.score||0)-(a.score||0));
+  const sig=JSON.stringify(todo); if(sig===renderAssistant.sig)return; renderAssistant.sig=sig;
+  $("queueList").innerHTML=todo.map(q=>`<div class="item"><div style="min-width:0;flex:1 1 240px"><b>${esc(q.company)}</b> <span class="muted">· ${esc(q.role)}</span><div class="note">${esc(q.source||"")}${q.location?" · "+esc(q.location):""}${q.why?" · "+esc(q.why):""}</div></div>
+    <div class="row">${/^https?:\/\//.test(q.link||"")?`<a class="btn" style="padding:4px 10px;font-size:13px" href="${esc(q.link)}" target="_blank" rel="noopener">Open</a>`:""}${q.note?`<button class="small" data-qcopy="${q.id}">Copy note</button>`:""}<button class="small" data-qdone="${q.id}">Done</button><button class="small" data-qskip="${q.id}">Skip</button></div></div>`).join("");
+  document.querySelectorAll("[data-qcopy]").forEach(b=>b.onclick=()=>{const q=queue.find(x=>x.id===b.dataset.qcopy);if(q)copy(q.note,b)});
+  document.querySelectorAll("[data-qdone]").forEach(b=>b.onclick=async()=>{const q=queue.find(x=>x.id===b.dataset.qdone);if(!q)return;b.disabled=true;
+    await saveApp({id:"q_"+q.id,createdAt:Date.now(),company:q.company,role:q.role,source:q.source||"Other",status:"Applied",applied:todayStr(),next:"",link:q.link||"",contact:"",location:q.location||"",notes:"Applied from the assistant's list"});
+    try{await db.collection("queue").doc(q.id).update({status:"done",doneAt:todayStr()})}catch(e){}});
+  document.querySelectorAll("[data-qskip]").forEach(b=>b.onclick=async()=>{try{await db.collection("queue").doc(b.dataset.qskip).update({status:"skip"})}catch(e){}});
+}
+function renderToday(){
+  const t=todayStr(); const n=apps.filter(a=>isSent(a)&&a.applied===t).length; const TARGET=TGT();
+  if(document.activeElement!==$("dailyTarget"))$("dailyTarget").value=TARGET;
+  $("ringText").textContent=n+"/"+TARGET;
+  $("ringArc").setAttribute("stroke-dashoffset",289-289*Math.min(n,TARGET)/TARGET);
+  $("todayMsg").textContent=n>=TARGET?"Target hit. Spend the rest of the day on follow-ups and interview prep.":n===0?`Target is ${TARGET}. Start with the list below or the Find jobs tab.`:(TARGET-n)+" more to hit today's target.";
+  // bars
+  const days=[...Array(14)].map((_,i)=>addDays(t,i-13)); const counts=days.map(d=>apps.filter(a=>isSent(a)&&a.applied===d).length);
+  const max=Math.max(TARGET,...counts);
+  $("bars").innerHTML=`<div class="goal" style="bottom:${20+TARGET/max*72}px" title="Target ${TARGET}"><span>target ${TARGET}</span></div>`+days.map((d,i)=>`<div class="b ${counts[i]<TARGET?"low":""}" title="${fmt(d)}: ${counts[i]}"><i style="height:${counts[i]/max*72}px"></i><small>${new Date(d+"T00:00:00").getDate()}</small></div>`).join("");
+  // sprint
+  const day=Math.min(Math.max(daysBetween(SPRINT_START,t)+1,1),SPRINT_DAYS); const end=addDays(SPRINT_START,SPRINT_DAYS-1);
+  $("sprintDay").textContent="Day "+day+" / "+SPRINT_DAYS; $("sprintBar").style.width=(day/SPRINT_DAYS*100)+"%";
+  const sent=apps.filter(isSent).length, interviews=apps.filter(a=>a.status==="Interview"||a.status==="Offer").length;
+  $("sprintNote").textContent=`Ends ${fmt(end)}. ${sent} sent so far; ${SPRINT_DAYS*TARGET*5/7|0} is the pace for ${TARGET} a day on weekdays. No offer by then: widen to any analyst or accounts role.`;
+  const by=s=>apps.filter(a=>a.status===s).length;
+  $("stats").innerHTML=[["Sent",sent],["Interviews",interviews],["Offers",by("Offer")],["Reply rate",sent?Math.round((interviews+by("Rejected"))/sent*100)+"%":"–"]].map(([k,v])=>`<div><b>${v}</b><span>${k}</span></div>`).join("");
+  // follow ups
+  const due=apps.filter(a=>a.status==="Applied"&&a.applied&&daysBetween(a.applied,t)>=7&&daysBetween(a.applied,t)<=30).sort((a,b)=>a.applied.localeCompare(b.applied));
+  $("followList").innerHTML=due.length?due.slice(0,8).map(a=>`<div class="item"><div><b>${esc(a.company)}</b> <span class="muted">· ${esc(a.role)}</span><div class="note">Applied ${fmt(a.applied)} · ${daysBetween(a.applied,t)} days ago${a.contact?" · "+esc(a.contact):""}</div></div><div class="row"><button class="small" data-copyfu="${a.id}">Copy follow-up</button><button class="small" data-mark="${a.id}">Mark followed up</button></div></div>`).join(""):`<div class="note" style="padding:8px 0">Nothing due. Follow-ups show here a week after you apply.</div>`;
+  const up=apps.filter(a=>a.next&&a.next>=t&&a.status!=="Rejected").sort((a,b)=>a.next.localeCompare(b.next));
+  $("upList").innerHTML=up.length?up.slice(0,8).map(a=>`<div class="item"><div><b>${esc(a.company)}</b> <span class="muted">· ${esc(a.role)}</span></div><div class="row"><span class="pill s-${SCLASS[a.status]}">${a.status}</span><span class="mono">${a.next===t?"Today":fmt(a.next)}</span></div></div>`).join(""):`<div class="note" style="padding:8px 0">No dates set. Add an interview date when you log one.</div>`;
+  document.querySelectorAll("[data-mark]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>x.id===b.dataset.mark);if(a)saveApp({...a,status:"Followed up"})});
+  document.querySelectorAll("[data-copyfu]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>x.id===b.dataset.copyfu);if(a)copy(followUp(a),b)});
+}
+function followUp(a){const first=profile.name.split(" ")[0];
+return `Hello${a.contact&&!/\d|@/.test(a.contact)?" "+a.contact.split(" ")[0]:""},
+
+I applied for the ${a.role} role at ${a.company} on ${fmt(a.applied)} and wanted to follow up. I'm still very interested. I bring hands-on banking operations experience plus SQL, Python and Power BI, and I've built two systems that are in daily use (a dealership ERP and a bank-branch payout scheduler).
+
+Could you let me know where the application stands, or if there's anything else you need from me? I'm available to join immediately.
+
+Thank you,
+${profile.name}
+${profile.phone.startsWith("[")?"":profile.phone+"\n"}${profile.email}`}
+
+/* ---------- tracker ---------- */
+$("f-status").innerHTML=STATUSES.map(s=>`<option>${s}</option>`).join("");
+$("filterStatus").innerHTML+=STATUSES.map(s=>`<option>${s}</option>`).join("");
+function openForm(a){
+  editingId=a?a.id:null; $("formPanel").hidden=false; $("formTitle").textContent=a?"Edit application":"Log an application";
+  $("formDelete").hidden=!a; $("dupWarn").hidden=true; $("dupWarn").dataset.key=""; $("formDelete").textContent="Delete"; $("formDelete").dataset.armed="";
+  const v=a||{source:"Naukri",status:"Applied",applied:todayStr()};
+  ["company","role","source","location","status","applied","next","link","contact","notes"].forEach(k=>$("f-"+k).value=v[k]||"");
+  $("f-company").focus(); $("formPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("newApp").onclick=()=>openForm();
+$("formClose").onclick=()=>{$("formPanel").hidden=true;editingId=null};
+$("appForm").addEventListener("submit",e=>{e.preventDefault();
+  const key=($("f-company").value+"|"+$("f-role").value).trim().toLowerCase();
+  const dup=apps.find(x=>x.id!==editingId&&(x.company+"|"+x.role).toLowerCase()===key);
+  if(dup&&$("dupWarn").dataset.key!==key){$("dupWarn").dataset.key=key;$("dupWarn").hidden=false;$("dupWarn").textContent=`You already logged ${dup.company} – ${dup.role} on ${fmt(dup.applied)}. Click Save again to log it anyway.`;return}
+  $("dupWarn").hidden=true;$("dupWarn").dataset.key="";
+  const a={id:editingId||("a"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),createdAt:(apps.find(x=>x.id===editingId)||{}).createdAt||Date.now()};
+  ["company","role","source","location","status","applied","next","link","contact","notes"].forEach(k=>a[k]=$("f-"+k).value.trim());
+  if(a.status!=="Saved"&&!a.applied)a.applied=todayStr();
+  saveApp(a); $("formPanel").hidden=true; editingId=null;
+});
+$("formDelete").onclick=()=>{const b=$("formDelete");if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Click again to delete";return}
+  removeApp(editingId);$("formPanel").hidden=true;editingId=null};
+$("filterStatus").onchange=renderTable; $("search").oninput=renderTable;
+function renderTable(){
+  const f=$("filterStatus").value, q=$("search").value.toLowerCase();
+  const rows=apps.filter(a=>(!f||a.status===f)&&(!q||(a.company+" "+a.role).toLowerCase().includes(q))).sort((a,b)=>(b.applied||"").localeCompare(a.applied||"")||b.createdAt-a.createdAt);
+  $("appRows").innerHTML=rows.length?rows.map(a=>`<tr>
+    <td><b>${esc(a.company)}</b>${a.gmailId?'<span class="tag" title="Logged automatically from your email">Gmail</span>':""}${a.location?`<div class="note">${esc(a.location)}</div>`:""}</td>
+    <td>${a.link&&/^https?:\/\//.test(a.link)?`<a href="${esc(a.link)}" target="_blank" rel="noopener" style="color:var(--ink)">${esc(a.role)}</a>`:esc(a.role)}</td>
+    <td><select data-st="${a.id}" aria-label="Status">${STATUSES.map(s=>`<option ${s===a.status?"selected":""}>${s}</option>`).join("")}</select></td>
+    <td class="mono">${fmt(a.applied)}</td><td class="mono">${fmt(a.next)}</td><td>${esc(a.source)}</td>
+    <td><button class="small" data-edit="${a.id}">Edit</button></td></tr>`).join("")
+   :`<tr><td colspan="7" class="empty">${apps.length?"No applications match.":"No applications yet. Log each one the moment you send it; the Today tab counts them."}</td></tr>`;
+  document.querySelectorAll("[data-st]").forEach(s=>s.onchange=()=>{const a=apps.find(x=>x.id===s.dataset.st);if(a)saveApp({...a,status:s.value,applied:a.applied||(s.value!=="Saved"?todayStr():"")})});
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openForm(apps.find(x=>x.id===b.dataset.edit)));
+}
+
+/* ---------- tailor ---------- */
+function analyse(jd){
+  const skills=profile.skills.toLowerCase()+" "+profile.projects.toLowerCase()+" "+profile.experience.toLowerCase()+" "+profile.summary.toLowerCase();
+  const asked=TERMS.filter(([,re])=>re.test(jd));
+  const hit=asked.filter(([n,re])=>re.test(skills)), miss=asked.filter(x=>!hit.includes(x));
+  const angle=/react|next\.?js|frontend|front-end|full.?stack|node|javascript|developer|software engineer/i.test(jd)?"dev":"analyst";
+  const bank=/bank|nbfc|loan|lending|credit|financ|insurance|fintech|microfinance/i.test(jd);
+  return {hit:hit.map(x=>nm(x[0])),miss:miss.map(x=>nm(x[0])),angle,bank,score:asked.length?Math.round(hit.length/asked.length*100):null};
+}
+function projectLine(r){const P=profile.projects.split("\n").filter(Boolean);
+  return r.angle==="dev"?P:[P[1],P[0],P[2]].filter(Boolean)}
+function templates(company,role,r){
+  const co=company||"your company", ro=role||"this role", me=profile.name, first=me.split(" ")[0];
+  const top=r.hit.slice(0,5).join(", ")||"SQL, Python and Power BI";
+  const P=projectLine(r);
+  const bankLine=r.bank?"I've worked inside a bank branch as a cashier, accountant and data analyst, so I understand the operations, compliance and reconciliation work behind the numbers.":"My background is in banking operations, which taught me to be accurate with data that has real money attached to it.";
+  const devLine=r.angle==="dev"?"I don't just analyse systems; I build them end to end, from database schema to deployed front end.":"I also build the tools I report from, so I can automate the manual parts of reporting instead of repeating them.";
+  const contact=[profile.phone.startsWith("[")?"":profile.phone,profile.email,profile.links].filter(Boolean).join(" · ");
+  const cover=`Dear Hiring Manager,
+
+I'm applying for the ${ro} position at ${co}. ${bankLine} ${devLine}
+
+Two examples of work that is live and in daily use today:
+• ${(P[0]||"").replace(/:\s*/,": ")}
+• ${(P[1]||"").replace(/:\s*/,": ")}
+
+The skills your post asks for that I use in practice: ${top}.${r.miss.length?"":" "}
+
+I can join immediately and would welcome a short call to show you either system running.
+
+Regards,
+${me}
+${contact}`;
+  const email=`Subject: Application – ${ro} – ${me}
+
+Hello,
+
+Please find my CV attached for the ${ro} role at ${co}.
+
+In short: banking operations background (cashier, accountant, data analyst), hands-on with ${top}, and two production systems I built that businesses use daily. I'm available to join immediately.
+
+Happy to share a live demo. Thank you for your time.
+
+${me}
+${contact}`;
+  const dm=`Hi, I saw the ${ro} opening at ${co}. I have a banking operations background and work with ${r.hit.slice(0,3).join(", ")||"SQL, Python and Power BI"}; I've also built two systems in daily use (a dealership ERP and a bank-branch payout scheduler). Could I send you my CV? I can join immediately. – ${first}`;
+  const cv=`Headline for this application:
+${r.angle==="dev"?"Full-Stack Developer (Next.js, React, Python, PostgreSQL) with banking domain experience":r.bank?"Data & MIS Analyst with hands-on banking operations experience":"Data Analyst (SQL, Python, Power BI) who builds production tools"}
+
+Put these skills first on your CV:
+${(r.hit.length?r.hit:["SQL","Python","Power BI"]).join(" · ")}
+
+Order your projects like this:
+${P.map((p,i)=>(i+1)+". "+p.split(":")[0]).join("\n")}`;
+  const prep=`Questions to prepare for:
+1. Walk me through a report or dashboard you built. What decision did it change?
+2. Write a SQL query: top 5 branches/customers by amount this month; then month-over-month change.
+3. How did MaturityFlow replace the manual process? What went wrong in the first week?
+4. Why are you leaving banking operations?${r.bank?"\n5. Explain how a deposit maturity / loan EMI is calculated and reconciled.":""}
+${r.angle==="dev"?"6. How is the dealership system structured (tables, roles, invoicing)? How do the 48 tests help?":"6. Excel: VLOOKUP vs INDEX-MATCH, pivot tables; Power BI: a DAX measure you've written."}
+7. What salary do you expect? (Decide your number before the call.)`;
+  return [["Cover letter",cover],["Email to HR",email],["LinkedIn / WhatsApp message",dm],["CV for this job",cv],["Interview prep",prep]];
+}
+function showOutputs(list){
+  $("t-outputs").innerHTML=list.map(([h,t],i)=>`<div class="outhead"><h3>${esc(h)}</h3><button class="small" data-cp="${i}">Copy</button></div><div class="out" id="out${i}">${esc(t)}</div>`).join("");
+  document.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy($("out"+b.dataset.cp).textContent,b));
+}
+function runTailor(){
+  const jd=$("t-jd").value.trim(); if(!jd){$("t-chips").innerHTML='<span class="muted">Paste a job post first.</span>';return null}
+  const r=analyse(jd);
+  $("t-score").textContent=r.score==null?"–":r.score+"%";
+  $("t-chips").innerHTML=(r.hit.map(s=>`<span class="chip hit">${esc(s)}</span>`).join("")+r.miss.map(s=>`<span class="chip miss">${esc(s)}</span>`).join(""))||'<span class="muted">No recognised skill keywords. The letter will use your core skills.</span>';
+  showOutputs(templates($("t-company").value.trim(),$("t-role").value.trim(),r));
+  return r;
+}
+$("t-go").onclick=runTailor;
+$("t-log").onclick=()=>{const c=$("t-company").value.trim(),r=$("t-role").value.trim();if(!c||!r){$("t-ainote").textContent="Fill in company and role first, then log it.";return}
+  saveApp({id:"a"+Date.now().toString(36),createdAt:Date.now(),company:c,role:r,source:"Other",status:"Applied",applied:todayStr(),next:"",link:"",contact:"",location:"",notes:""});
+  $("t-ainote").textContent=`Logged: ${c} – ${r}. It counts toward today's 10.`};
+let sample=null;
+async function initSample(){try{sample=await window.claude.use("sample")}catch(e){sample=null} aiInitUI()}
+/* ---------- any-AI layer ---------- */
+const IS_APP=!window.claude;
+const PROVIDERS={
+  claude:{label:"Claude (inside this page)",needsKey:false},
+  paste:{label:"Any AI app, copy and paste (Gemini, Grok, ChatGPT, Claude)",needsKey:false,help:"Works with your Gemini or Grok subscription: the page gives you a request to paste into the AI app, then you paste the answer back. Nothing to set up."},
+  gemini:{label:"Google Gemini API key (free tier)",needsKey:true,model:"gemini-3.5-flash",help:"Get a free key at aistudio.google.com → Get API key. The free tier has daily limits, and Google may use free-tier requests to improve its products, so only your profile and job posts are sent."},
+  openai:{label:"Grok / OpenAI / Groq / OpenRouter API key",needsKey:true,base:"https://api.x.ai/v1",model:"grok-4.7",help:"For Grok, create a key at console.x.ai (paid per use; a SuperGrok or X Premium subscription doesn't include API access). Also works with OpenAI (https://api.openai.com/v1), Groq (https://api.groq.com/openai/v1) or OpenRouter (https://openrouter.ai/api/v1): change the address and model."},
+  local:{label:"Local AI on this computer (Ollama / LM Studio)",needsKey:false,local:true,base:"http://localhost:11434/v1",model:"",help:"Runs free on your own computer. Ollama: http://localhost:11434/v1. LM Studio: http://localhost:1234/v1 (turn on its server and CORS). Tap Find models to fill in the model name. It only works when this app is opened on the same computer, not on your phone."},
+  anthropic:{label:"Claude API key",needsKey:true,model:"",help:"Create a key at console.anthropic.com and enter the model name listed there."},
+  none:{label:"No AI (offline templates only)",needsKey:false,help:"The offline writer still drafts applications from your profile."}
+};
+function aiCfg(){const c=LS.get("jd-ai")||{};const def=sample?"claude":"paste";return {provider:c.provider||def,model:c.model||"",key:c.key||"",base:c.base||""}}
+function aiAvailable(p){if(p==="claude")return !!sample; if(["gemini","openai","anthropic","local"].includes(p))return IS_APP; return true}
+function aiInitUI(){
+  const sel=$("ai-provider"); const cfg=aiCfg();
+  sel.innerHTML=Object.entries(PROVIDERS).filter(([k])=>aiAvailable(k)).map(([k,v])=>`<option value="${k}">${esc(v.label)}</option>`).join("");
+  sel.value=aiAvailable(cfg.provider)?cfg.provider:(sample?"claude":"paste"); aiFields();
+  $("t-ai").hidden=aiCfg().provider==="none";
+}
+function aiFields(){const p=$("ai-provider").value, P=PROVIDERS[p]||{}, cfg=aiCfg(), same=cfg.provider===p;
+  $("ai-keyrow").hidden=!(P.needsKey||P.local); $("ai-baselab").hidden=!(p==="openai"||p==="local"); $("ai-keylab").hidden=!!P.local; $("ai-models").hidden=!P.local;
+  $("ai-model").value=same&&cfg.model?cfg.model:(P.model||""); $("ai-key").value=same?cfg.key:""; $("ai-base").value=same&&cfg.base?cfg.base:(P.base||"");
+  $("ai-help").textContent=(P.help||"")+(!IS_APP&&p==="paste"?" API keys work in the installed app version.":"");}
+$("ai-provider").onchange=aiFields;
+$("ai-models").onclick=async()=>{const n=$("ai-note");n.hidden=false;n.textContent="Looking for models…";
+  const base=($("ai-base").value.trim()||PROVIDERS.local.base).replace(/\/+$/,"");
+  try{const r=await fetch(base+"/models");const j=await r.json();const ids=(j.data||[]).map(m=>m.id).filter(Boolean);
+    if(!ids.length){n.textContent="Connected, but no models are installed. In Ollama run: ollama pull llama3.2:3b";return}
+    const pick=ids.find(i=>!/embed/i.test(i))||ids[0]; $("ai-model").value=pick;
+    n.textContent=`Found ${ids.length} model${ids.length===1?"":"s"}: ${ids.slice(0,8).join(", ")}. Using ${pick}; change it above if you prefer another, then Save.`}
+  catch(e){n.textContent=aiErr({code:"local"})}};
+$("ai-save").onclick=()=>{const p=$("ai-provider").value;LS.set("jd-ai",{provider:p,model:$("ai-model").value.trim(),key:$("ai-key").value.trim(),base:$("ai-base").value.trim().replace(/\/+$/,"")});
+  $("ai-note").hidden=false;$("ai-note").textContent="Saved. "+(PROVIDERS[p].label)+" will be used on this device.";$("t-ai").hidden=p==="none"};
+$("ai-test").onclick=async()=>{$("ai-save").click();const n=$("ai-note");n.textContent="Testing…";
+  try{const j=await askAI('Reply with only this JSON and nothing else: {"ok":true,"name":"<your model name>"}',{json:true,title:"Test your AI"});n.textContent=j&&j.ok?`It works${j.name?" ("+String(j.name).slice(0,40)+")":""}.`:"The AI answered, but not in the expected format. It may still work for longer requests."}
+  catch(e){n.textContent=aiErr(e)}};
+function aiErr(e){const c=e&&e.code;return c==="cancelled"?"Cancelled.":c==="no_ai"?"Pick an AI in My profile → AI settings first.":c==="no_key"?"Add your API key in My profile → AI settings.":
+  c==="auth"?"The API key was refused. Check it in My profile → AI settings.":c==="quota"?"The AI's usage limit is reached. Wait a bit, or switch to copy and paste.":
+  c==="network"?"Couldn't reach the AI (offline, or the provider blocks calls from a browser). Try copy and paste instead.":c==="bad_json"?"The AI's answer wasn't in the expected format. Try again.":
+  c==="local"?"Couldn't reach your local AI. Check that Ollama or LM Studio is running on this computer, the address is right, and it allows this site (see the setup note in AI settings).":c==="not_granted"?"Claude access wasn't allowed for this page.":c==="rate_limited"?"Claude is busy. Try again in a few minutes.":"The AI couldn't answer: "+((e&&e.message)||"unknown error")}
+function parseJSON(t){t=String(t||"").replace(/```(?:json)?/gi,"").trim();
+  const i=Math.min(...["{","["].map(ch=>{const k=t.indexOf(ch);return k<0?1e9:k})); const j=Math.max(t.lastIndexOf("}"),t.lastIndexOf("]"));
+  if(i>=1e9||j<i)throw {code:"bad_json"}; try{return JSON.parse(t.slice(i,j+1))}catch(e){throw {code:"bad_json"}}}
+function pasteAsk(prompt,title){return new Promise((resolve,reject)=>{const m=$("ai-modal");$("ai-mtitle").textContent=title||"Ask your AI";$("ai-mprompt").value=prompt;$("ai-manswer").value="";$("ai-merr").hidden=true;m.hidden=false;
+  const done=(fn,v)=>{m.hidden=true;$("ai-mcancel").onclick=$("ai-muse").onclick=null;fn(v)};
+  $("ai-mcopy").onclick=()=>copy(prompt,$("ai-mcopy"));
+  $("ai-mcancel").onclick=()=>done(reject,{code:"cancelled"});
+  $("ai-muse").onclick=()=>{const a=$("ai-manswer").value.trim();if(!a){$("ai-merr").hidden=false;$("ai-merr").textContent="Paste the AI's answer first.";return}done(resolve,a)};})}
+async function httpJSON(url,opts){let r;try{r=await fetch(url,opts)}catch(e){throw {code:"network"}}
+  let body=null;try{body=await r.json()}catch(e){}
+  if(r.status===401||r.status===403)throw {code:"auth"}; if(r.status===429)throw {code:"quota"};
+  if(!r.ok)throw {code:"http",message:(body&&(body.error&&(body.error.message||body.error)||body.message))||("HTTP "+r.status)}; return body}
+async function askAI(prompt,{json=false,title}={}){
+  const c=aiCfg(), p=c.provider; let text;
+  if(p==="none")throw {code:"no_ai"};
+  if(PROVIDERS[p]&&PROVIDERS[p].needsKey&&!c.key)throw {code:"no_key"};
+  if(p==="claude"){if(!sample)throw {code:"no_ai"}; if(json)return await sample.json(prompt,{modelTier:"default"}); return (await sample(prompt,{modelTier:"default"})).text}
+  if(p==="paste")text=await pasteAsk(prompt+(json?"\n\nReturn ONLY the JSON, with no other text.":""),title);
+  else if(p==="gemini"){const b=await httpJSON(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(c.model||PROVIDERS.gemini.model)}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":c.key},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:json?{responseMimeType:"application/json"}:{}})});
+    text=(((b&&b.candidates||[])[0]||{}).content||{parts:[]}).parts.map(x=>x.text||"").join("")}
+  else if(p==="openai"||p==="local"){if(p==="local"&&!c.model)throw {code:"http",message:"Pick a model: tap Find models in AI settings"};
+    const h={"Content-Type":"application/json"}; if(c.key&&p==="openai")h.Authorization="Bearer "+c.key;
+    let b; try{b=await httpJSON((c.base||PROVIDERS[p].base)+"/chat/completions",{method:"POST",headers:h,body:JSON.stringify({model:c.model||PROVIDERS[p].model,messages:[{role:"user",content:prompt+(json?"\n\nReturn ONLY valid JSON.":"")}]})})}catch(e){if(p==="local"&&e&&e.code==="network")throw {code:"local"};throw e}
+    text=(((b&&b.choices||[])[0]||{}).message||{}).content||""}
+  else if(p==="anthropic"){if(!c.model)throw {code:"http",message:"Enter the Claude model name in AI settings"};const b=await httpJSON("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":c.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:c.model,max_tokens:4000,messages:[{role:"user",content:prompt+(json?"\n\nReturn ONLY valid JSON.":"")}]})});
+    text=((b&&b.content)||[]).map(x=>x.text||"").join("")}
+  return json?parseJSON(text):text;
+}
+const RULES="Use ONLY facts from the profile; never invent employers, numbers, degrees or skills. Plain, specific Indian business English, no clichés.";
+const profileForAI=()=>{const p={...profile};delete p.phone;return JSON.stringify(p,null,1)};
+$("t-ai").onclick=async()=>{
+  const r=runTailor(); if(!r)return; const b=$("t-ai"); b.disabled=true; b.textContent="AI is writing…";
+  const prompt=`You are helping a job seeker in India write one job application. ${RULES} If the job asks for something he lacks, don't claim it.
+
+PROFILE
+${profileForAI()}
+
+JOB
+Company: ${$("t-company").value||"(find it in the post)"}
+Role: ${$("t-role").value||"(find it in the post)"}
+${$("t-jd").value.slice(0,8000)}
+
+Return JSON with keys: company (from the post), role (from the post), coverLetter (under 220 words, signed with his name), email (subject line first, under 120 words), message (LinkedIn/WhatsApp, under 60 words), cvBullets (array of 5 CV bullets for this job, true to the profile), gaps (array: requirements he doesn't meet and how to handle each honestly), interviewQuestions (array of 6 likely questions, each with a one-line answer hint).`;
+  try{const j=await askAI(prompt,{json:true,title:"Write this application"});
+    if(!$("t-company").value.trim()&&j.company)$("t-company").value=String(j.company).slice(0,100);
+    if(!$("t-role").value.trim()&&j.role)$("t-role").value=String(j.role).slice(0,120);
+    const L=x=>Array.isArray(x)?x.map(v=>"• "+(typeof v==="object"?Object.values(v).join(" — "):v)).join("\n"):String(x||"");
+    showOutputs([["Cover letter",String(j.coverLetter||"")],["Email to HR",String(j.email||"")],["LinkedIn / WhatsApp message",String(j.message||"")],["CV bullets for this job",L(j.cvBullets)],["Gaps and how to handle them",L(j.gaps)],["Interview prep",L(j.interviewQuestions)]]);
+    $("t-ainote").textContent="Written by AI from your profile. Read it once before sending.";
+  }catch(e){$("t-ainote").textContent=aiErr(e)+" The offline version above is ready to use."}
+  b.disabled=false; b.textContent="Write with AI";
+};
+/* import from text */
+$("imp-open").onclick=()=>{$("imp-panel").hidden=false;$("rep-panel").hidden=true;$("imp-text").focus()};
+$("imp-close").onclick=()=>$("imp-panel").hidden=true;
+function quickParse(t){const out=[];const re=/application was sent to ([^\n]+)\n+([^\n]+)\n([^\n]+)/gi;let m;while((m=re.exec(t)))out.push({company:m[3].trim()||m[1].trim(),role:m[2].trim(),date:"",source:"LinkedIn"});return out}
+$("imp-go").onclick=async()=>{const t=$("imp-text").value.trim(),box=$("imp-results");if(!t){box.innerHTML='<p class="note">Paste some text first.</p>';return}
+  const b=$("imp-go");b.disabled=true;b.textContent="Reading…";let list=[];
+  try{if(aiCfg().provider==="none")throw {code:"no_ai"};
+    const j=await askAI(`Extract every job application the person has ALREADY SENT from the text below (confirmation emails or an "applied jobs" page). Ignore job recommendations, alerts and ads. Today is ${todayStr()}.
+Return JSON: {"applications":[{"company":"","role":"","date":"YYYY-MM-DD or empty","source":"Naukri|LinkedIn|Indeed|foundit|Company site|Other","location":""}]}
+
+TEXT
+${t.slice(0,15000)}`,{json:true,title:"Import applications"});
+    list=(j&&j.applications)||(Array.isArray(j)?j:[]);
+  }catch(e){list=quickParse(t);if(!list.length){box.innerHTML=`<p class="note">${esc(aiErr(e))}</p>`;b.disabled=false;b.textContent="Find applications";return}}
+  list=list.filter(x=>x&&x.company&&x.role).slice(0,100).map(x=>({...x,company:String(x.company).slice(0,120),role:String(x.role).slice(0,160),date:/^\d{4}-\d{2}-\d{2}$/.test(x.date||"")?x.date:todayStr()}));
+  const dupe=x=>apps.some(a=>norm(a.company)===norm(x.company)&&norm(a.role)===norm(x.role));
+  box.innerHTML=list.length?`<p class="note">Found ${list.length}. Untick any you don't want.</p><div class="list">${list.map((x,i)=>`<label class="pick"><input type="checkbox" data-imp="${i}" ${dupe(x)?"":"checked"}><span><b>${esc(x.company)}</b> · ${esc(x.role)}<br><span class="note">${fmt(x.date)} · ${esc(x.source||"Other")}${dupe(x)?" · already in your list":""}</span></span></label>`).join("")}</div><div class="row" style="margin-top:10px"><button class="primary" id="imp-add">Add selected</button></div>`:'<p class="note">No sent applications found in that text.</p>';
+  if(list.length)$("imp-add").onclick=async()=>{let n=0;for(const el of document.querySelectorAll("[data-imp]")){if(!el.checked)continue;const x=list[+el.dataset.imp];
+      await saveApp({id:"a"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),createdAt:Date.now(),company:x.company,role:x.role,source:x.source||"Other",status:"Applied",applied:x.date,next:"",link:"",contact:"",location:String(x.location||"").slice(0,80),notes:"Imported from pasted text"});n++}
+    box.innerHTML=`<p class="note">Added ${n} application${n===1?"":"s"}.</p>`;$("imp-text").value=""};
+  b.disabled=false;b.textContent="Find applications"};
+/* reply helper */
+$("rep-open").onclick=()=>{$("rep-panel").hidden=false;$("imp-panel").hidden=true;$("rep-text").focus()};
+$("rep-close").onclick=()=>$("rep-panel").hidden=true;
+$("rep-go").onclick=async()=>{const t=$("rep-text").value.trim(),box=$("rep-results");if(!t){box.innerHTML='<p class="note">Paste the message first.</p>';return}
+  const b=$("rep-go");b.disabled=true;b.textContent="Reading…";
+  const list=apps.map(a=>`${a.id} | ${a.company} | ${a.role}`).slice(0,200).join("\n");
+  try{const j=await askAI(`A job seeker in India received this message from a recruiter or company. ${RULES}
+Classify it and draft his reply. His applications (id | company | role):
+${list||"(none yet)"}
+
+His profile:
+${profileForAI()}
+
+MESSAGE
+${t.slice(0,6000)}
+
+Return JSON: {"kind":"Interview|Rejected|Offer|Question|Other","company":"","role":"","appId":"id from the list above, or empty","date":"interview date YYYY-MM-DD if given, else empty","summary":"one sentence","reply":"his reply, polite and short; for an interview confirm availability; for a rejection thank them and ask to be considered for future roles"}`,{json:true,title:"Read the recruiter's message"});
+    const a=apps.find(x=>x.id===j.appId)||(j.company?matchApp(j.company+" "+(j.role||"")):null);
+    const kind=["Interview","Rejected","Offer"].includes(j.kind)?j.kind:"";
+    box.innerHTML=`<div class="grid" style="gap:10px"><p style="margin:0"><span class="pill s-${kind||"Saved"}">${esc(j.kind||"Other")}</span> ${esc(j.summary||"")}</p>
+      ${a?`<p class="note" style="margin:0">Matches <b>${esc(a.company)}</b> – ${esc(a.role)}</p>`:`<p class="note" style="margin:0">${j.company?"Not in your list yet: "+esc(j.company):"Couldn't tell which application this is."}</p>`}
+      <div class="row">${a&&kind?`<button class="primary" id="rep-apply">Set status to ${kind}${j.date?" and date "+fmt(j.date):""}</button>`:""}${!a&&j.company&&kind?`<button class="primary" id="rep-addnew">Add ${esc(j.company)} as ${kind}</button>`:""}</div>
+      <div class="outhead" style="margin:4px 0 0"><h3>Your reply</h3><button class="small" id="rep-copy">Copy</button></div><div class="out" id="rep-reply">${esc(j.reply||"")}</div></div>`;
+    $("rep-copy").onclick=()=>copy($("rep-reply").textContent,$("rep-copy"));
+    const dt=/^\d{4}-\d{2}-\d{2}$/.test(j.date||"")?j.date:"";
+    if($("rep-apply"))$("rep-apply").onclick=async()=>{await saveApp({...a,status:kind,next:dt||a.next});$("rep-apply").textContent="Updated";$("rep-apply").disabled=true};
+    if($("rep-addnew"))$("rep-addnew").onclick=async()=>{await saveApp({id:"a"+Date.now().toString(36),createdAt:Date.now(),company:String(j.company).slice(0,120),role:String(j.role||"").slice(0,160)||"(role not given)",source:"Other",status:kind,applied:todayStr(),next:dt,link:"",contact:"",location:"",notes:"Added from a recruiter message"});$("rep-addnew").textContent="Added";$("rep-addnew").disabled=true};
+  }catch(e){box.innerHTML=`<p class="note">${esc(aiErr(e))}</p>`}
+  b.disabled=false;b.textContent="Read it"};
+
+/* ---------- find ---------- */
+$("q-role").innerHTML=ROLES.map(r=>`<option>${r}</option>`).join("");
+$("q-loc").innerHTML=LOCS.map(r=>`<option>${r}</option>`).join("");
+$("q-best").innerHTML=BEST.map(b=>`<span class="chip">${esc(b)}</span>`).join("");
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function renderLinks(){
+  const q=$("q-custom").value.trim()||$("q-role").value, l=$("q-loc").value, e=encodeURIComponent;
+  const remote=l==="Remote", anywhere=l==="India";
+  const L=[
+    ["Naukri", "India's biggest board; apply same day", remote?`https://www.naukri.com/${slug(q)}-jobs?wfhType=2`:anywhere?`https://www.naukri.com/${slug(q)}-jobs`:`https://www.naukri.com/${slug(q)}-jobs-in-${slug(l)}`],
+    ["LinkedIn Jobs","Past week; message the poster after applying",`https://www.linkedin.com/jobs/search/?keywords=${e(q)}&location=${e(remote||anywhere?"India":l)}&f_TPR=r604800${remote?"&f_WT=2":""}`],
+    ["Indeed","Past 7 days",`https://in.indeed.com/jobs?q=${e(q+(remote?" remote":""))}&l=${e(remote||anywhere?"India":l)}&fromage=7`],
+    ["foundit","Formerly Monster India",`https://www.foundit.in/srp/results?query=${e(q)}&locations=${e(remote||anywhere?"India":l)}`],
+    ["Google Jobs","Collects posts from many sites",`https://www.google.com/search?q=${e(q+" jobs "+(remote?"remote India":anywhere?"India":l))}&ibp=htl;jobs`],
+    ["LinkedIn posts","\"Hiring\" posts from recruiters, often no applicants yet",`https://www.linkedin.com/search/results/content/?keywords=${e('hiring "'+q+'"'+(remote||anywhere?"":" "+l))}&datePosted=%22past-week%22`]
+  ];
+  $("q-links").innerHTML=L.map(([n,d,u])=>`<a href="${u}" target="_blank" rel="noopener"><b>${n} →</b><small>${esc(q)} · ${esc(l)} · ${d}</small></a>`).join("");
+}
+["q-role","q-loc"].forEach(i=>$(i).onchange=renderLinks); $("q-custom").oninput=renderLinks; renderLinks();
+
+/* ---------- profile ---------- */
+const PF=["name","email","phone","location","links","notice","headline","summary","skills","experience","projects","education"];
+function fillProfile(){PF.forEach(k=>{const el=$("p-"+k);if(el&&document.activeElement!==el)el.value=profile[k]||""})}
+$("p-save").onclick=()=>{const p={};PF.forEach(k=>p[k]=$("p-"+k).value.trim());saveProfile(p)};
+
+/* ---------- Gmail auto-import ---------- */
+const GM="Gmail"; let mcp=null, syncing=false;
+const dec=s=>{const t=document.createElement("textarea");t.innerHTML=String(s||"");return t.value.replace(/[͏​-‏­]/g,"").replace(/\s+/g," ").trim()};
+const norm=s=>String(s||"").toLowerCase().replace(/\b(pvt|private|ltd|limited|inc|llp|technologies|technology|solutions|services|india)\b/g,"").replace(/[^a-z0-9]/g,"");
+const localDate=iso=>{const d=new Date(iso);return isNaN(d)?todayStr():new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+function setGm(t){document.querySelectorAll(".gm-status").forEach(el=>{el.hidden=!t;el.textContent=t})}
+function gmailErr(e){const c=e&&e.code;
+  return c==="needs_reauth"?"Gmail needs reconnecting: claude.ai → Settings → Connectors → Gmail.":
+    c==="server_not_connected"?"Gmail isn't connected to your Claude account. Add it in claude.ai → Settings → Connectors.":
+    c==="selection_required"?"You have more than one Gmail connected. Pick one in the prompt, then sync again.":
+    c==="not_in_manifest"?"Gmail access is turned off for this page. Allow it and sync again.":
+    c==="blocked_by_policy"||c==="approval_required"?"Your account settings don't allow this page to read Gmail.":
+    c==="server_unavailable"?"Gmail didn't answer. Try again in a minute.":
+    c==="tool_error"?"Gmail reported a problem: "+(e.message||"unknown"):
+    c==="not_granted"||c==="capability_disabled"||c==="capability_removed"?"Gmail sync isn't available in this view.":
+    "Couldn't check Gmail ("+(c||"error")+"). Try again.";}
+async function saveSettings(){if(db){try{await db.doc("settings/main").set(settings)}catch(e){}}else LS.set("jd-settings",settings)}
+async function initGmail(){
+  try{mcp=window.claude&&window.claude.use?await window.claude.use("mcp"):null}catch(e){mcp=null}
+  document.querySelectorAll(".gm-sync").forEach(b=>{b.hidden=!mcp;b.onclick=()=>syncGmail(true)});
+  if(!mcp)return;
+  if(settings.gmailLastSync){setGm("Gmail last checked "+fmt(settings.gmailLastSync)+".");syncGmail(false)}
+  else setGm("Tap Sync from Gmail to log the applications you've already sent. It reads only job-application emails.");
+}
+async function gmSearch(query,maxPages){let out=[],token="";
+  for(let i=0;i<maxPages;i++){const r=await mcp.callTool(GM,"search_threads",token?{query,pageSize:50,pageToken:token}:{query,pageSize:50});
+    const p=(r&&r.payload)||{}; out=out.concat(p.threads||[]); token=p.nextPageToken; if(!token)break}
+  return out}
+async function gmBody(id){const r=await mcp.callTool(GM,"get_thread",{threadId:id,messageFormat:"PLAIN_TEXT"});
+  const m=(((r&&r.payload)||{}).messages||[])[0]||{}; return String(m.plaintextBody||"")}
+const cleanLink=u=>{try{const x=new URL(u);const red=x.searchParams.get("redirect");if(red)return cleanLink(red);if(/linkedin\.com/.test(x.host)){const m=x.pathname.match(/\/jobs\/view\/(\d+)/);if(m)return "https://www.linkedin.com/jobs/view/"+m[1]+"/"}return x.origin+x.pathname}catch(e){return ""}};
+async function parseThread(t){
+  const m=(t.messages||[])[0]; if(!m)return [];
+  const subj=dec(m.subject), from=String(m.sender||"").toLowerCase(), snip=dec(m.snippet), date=localDate(m.date), id=t.id;
+  let x;
+  if(/linkedin\.com/.test(from)&&(x=subj.match(/application was sent to (.+)$/i))){
+    let role="",company=x[1].trim(),loc="",link="";
+    try{const L=(await gmBody(id)).split("\n").map(l=>l.trim());const i=L.findIndex(l=>/^your application was sent to/i.test(l));
+      if(i>=0){const n=L.slice(i+1).filter(Boolean);if(n[0]&&!/^view job/i.test(n[0]))role=n[0];if(n[1]&&!/^view job/i.test(n[1]))company=n[1];if(n[2]&&!/^view job/i.test(n[2]))loc=n[2];
+        const v=n.find(l=>/^view job:/i.test(l));if(v)link=cleanLink(v.replace(/^view job:\s*/i,""))}}catch(e){if(e&&e.code&&e.code!=="tool_error")throw e}
+    return [{key:id,company,role:role||"(role not in email)",source:"LinkedIn",applied:date,location:loc,link}];
+  }
+  if(/naukri\.com/.test(from)&&(x=subj.match(/you applied for (\d+) jobs? on/i))){
+    const n=+x[1]; let body=""; try{body=await gmBody(id)}catch(e){if(e&&e.code&&e.code!=="tool_error")throw e}
+    const dm=body.match(/Applied on ([A-Za-z]+ \d{1,2}, \d{4})/); const d2=dm?localDate(dm[1]+" 12:00"):date;
+    const out=[]; const re=/\[((?:\|[^\]\[]*?)+)\]\((https:\/\/[^)\s]*?job-listings[^)\s]*)\)/g; let k;
+    while((k=re.exec(body))){const cells=k[1].split("|").map(c=>c.trim()).filter(Boolean);if(cells.length>=2)out.push({key:id+"_"+out.length,role:cells[0],company:cells[cells.length-1],source:"Naukri",applied:d2,link:cleanLink(k[2])})}
+    for(let j=out.length;j<n;j++)out.push({key:id+"_x"+j,role:"Naukri application "+(j+1)+" of "+n,company:"Naukri (name not in email)",source:"Naukri",applied:d2,notes:"Naukri's email didn't name this job. Check Applied Jobs on Naukri and edit this row."});
+    return out;
+  }
+  if((x=subj.match(/^indeed application:\s*(.+)$/i))){
+    const c=snip.match(/(?:to|at)\s+([A-Z][^.,\n]{1,60}?)(?:\s+(?:has|for|was|via)\b|[.,]|$)/);
+    return [{key:id,role:x[1].trim(),company:c?c[1].trim():"(via Indeed)",source:"Indeed",applied:date}];
+  }
+  if(/linkedin\.com|naukri\.com|indeed\.com|foundit|jobalert/.test(from))return [];
+  const text=subj+" "+snip;
+  if(!/(received your application|application (has been |was )?(received|submitted)|thank(s| you) for (applying|your application|your interest)|we have received|confirm(ing)? (that )?we|application for)/i.test(text))return [];
+  if(/(complete your application|finish your application|jobs? for you|recommended)/i.test(text))return [];
+  let role=(subj.match(/application (?:for|to)\s+(?:the\s+)?(?:position of\s+|role of\s+)?(.+?)(?:\s+(?:role|position))?(?:\s*[-–|]\s*\d+)?(?:\s+at\s+.+)?$/i)||[])[1]||(snip.match(/(?:for|apply for) the (.+?) (?:role|position)/i)||[])[1]||"";
+  let comp=(snip.match(/(?:role|position|opening|job) at ([A-Z][\w&.'\- ]{1,50}?)(?:[.,!]| we| and)/)||[])[1]||(subj.match(/ at ([A-Z][\w&.'\- ]{1,50})$/)||[])[1];
+  if(!comp){const dom=(from.match(/@([^>\s]+)/)||[])[1]||"";const parts=dom.split(".");const base=parts.length>2?parts[parts.length-2]:parts[0];comp=base?base.charAt(0).toUpperCase()+base.slice(1):"Unknown company"}
+  return [{key:id,company:comp.trim(),role:(role||"(role not in email)").trim(),source:"Company site",applied:date}];
+}
+function classify(text){
+  if(/unfortunately|regret to inform|not (be )?(moving|proceeding) forward|other candidates|not been selected|position has been filled|decided not to/i.test(text))return "Rejected";
+  if(/interview|shortlisted|next round|assessment|telephonic|schedule (a|your) (call|discussion)|meet you/i.test(text))return "Interview";
+  return "";
+}
+function matchApp(text,extra){const n=norm(text);let best=null;
+  for(const a of [...apps,...(extra||[])]){const c=norm(a.company);if(c.length>=3&&n.includes(c)&&(!best||c.length>norm(best.company).length))best=a}return best}
+async function scanReplies(after,extra){
+  const q=`after:${after} (interview OR shortlisted OR "next round" OR assessment OR unfortunately OR regret OR "moving forward" OR "other candidates") -from:linkedin.com -from:naukri.com -from:indeed.com -from:foundit.in -from:instahyre.com -category:promotions -category:social -in:sent`;
+  const th=await gmSearch(q,1); const out=[];
+  for(const t of th){const ms=t.messages||[];const m=ms[ms.length-1]||{};const subj=dec(m.subject),snip=dec(m.snippet),from=dec(m.sender);
+    const kind=classify(subj+" "+snip); if(!kind)continue; const a=matchApp(subj+" "+snip+" "+from,extra);
+    if(!a&&!/job|role|position|application|candidat|hiring|recruit|interview/i.test(subj+" "+snip))continue;
+    out.push({id:t.id,kind,subject:subj.slice(0,160),sender:from.slice(0,80),date:localDate(m.date),snippet:snip.slice(0,200),appId:a?a.id:"",url:String(t.viewUrl||m.viewUrl||"")})}
+  return out.slice(0,15);
+}
+async function syncGmail(manual){
+  if(syncing||!mcp)return; syncing=true; document.querySelectorAll(".gm-sync").forEach(b=>{b.disabled=true;b.textContent="Checking Gmail…"});
+  setGm("Reading your job-application emails…");
+  try{
+    const since=settings.gmailLastSync?addDays(settings.gmailLastSync,-2):addDays(todayStr(),-60); const after=since.replace(/-/g,"/");
+    const q=`after:${after} {subject:"application was sent" subject:"You applied for" subject:"Indeed Application" subject:"received your application" subject:"application received" subject:"thank you for applying" subject:"thanks for applying" subject:"application for"} -from:jobalert.indeed.com -in:sent -in:draft`;
+    const threads=await gmSearch(q,4);
+    const known=new Set(apps.map(a=>a.gmailId).filter(Boolean)); const pending=threads.filter(t=>!known.has(t.id)&&![...known].some(k=>k.startsWith(t.id+"_")));
+    let added=0,seen=0; const newApps=[];
+    for(const t of pending){seen++; if(seen%5===0)setGm(`Reading your job-application emails… ${seen}/${pending.length}`);
+      let found=[]; try{found=await parseThread(t)}catch(e){if(e&&e.code&&e.code!=="tool_error")throw e}
+      for(const f of found){ if(known.has(f.key))continue; known.add(f.key);
+        if(f.role&&!/^\(|^Naukri application/.test(f.role)&&apps.some(a=>norm(a.company)===norm(f.company)&&norm(a.role)===norm(f.role)))continue;
+        const a={id:"gm_"+f.key.replace(/[^A-Za-z0-9_-]/g,"_"),gmailId:f.key,createdAt:Date.now(),company:f.company.slice(0,120),role:f.role.slice(0,160),source:f.source,status:"Applied",applied:f.applied,next:"",link:f.link||"",contact:"",location:(f.location||"").slice(0,80),notes:f.notes||"Logged automatically from Gmail"};
+        await saveApp(a); newApps.push(a); added++; }
+    }
+    let replies=settings.replies||[]; try{const fresh=await scanReplies(after,newApps.filter(n=>!apps.some(x=>x.id===n.id)));const ids=new Set(fresh.map(r=>r.id));replies=[...fresh,...replies.filter(r=>!ids.has(r.id))].slice(0,30)}catch(e){if(e&&e.code&&e.code!=="tool_error")throw e}
+    settings={...settings,gmailLastSync:todayStr(),replies}; await saveSettings(); render();
+    const pend=replies.filter(r=>!(settings.dismissed||[]).includes(r.id)).length;
+    setGm(`Gmail checked just now: ${added} new application${added===1?"":"s"} logged${pend?`, ${pend} repl${pend===1?"y":"ies"} to review on Today`:""}.`);
+  }catch(e){setGm(gmailErr(e))}
+  syncing=false; document.querySelectorAll(".gm-sync").forEach(b=>{b.disabled=false;b.textContent="Sync from Gmail"});
+}
+function renderReplies(){
+  const list=(settings.replies||[]).filter(r=>!(settings.dismissed||[]).includes(r.id));
+  $("repliesPanel").hidden=!list.length;
+  $("replyList").innerHTML=list.map(r=>{const a=apps.find(x=>x.id===r.appId);return `<div class="item"><div style="min-width:0;flex:1 1 260px"><span class="pill s-${r.kind==="Interview"?"Interview":"Rejected"}">${r.kind==="Interview"?"Looks like an interview":"Looks like a rejection"}</span> <b>${esc(r.subject)}</b><div class="note">${esc(r.sender)} · ${fmt(r.date)}${a?` · matches <b>${esc(a.company)}</b> – ${esc(a.role)}`:""}</div><div class="note">${esc(r.snippet)}</div></div>
+    <div class="row">${a?`<button class="small" data-rset="${r.id}">Mark ${r.kind==="Interview"?"interview":"rejected"}</button>`:""}${/^https:\/\/mail\.google\.com\//.test(r.url)?`<a class="btn" style="padding:4px 10px;font-size:13px" href="${esc(r.url)}" target="_blank" rel="noopener">Open email</a>`:""}<button class="small" data-rdis="${r.id}">Dismiss</button></div></div>`}).join("");
+  document.querySelectorAll("[data-rset]").forEach(b=>b.onclick=async()=>{const r=settings.replies.find(x=>x.id===b.dataset.rset);const a=r&&apps.find(x=>x.id===r.appId);if(a)await saveApp({...a,status:r.kind});settings={...settings,dismissed:[...(settings.dismissed||[]),r.id]};await saveSettings();render()});
+  document.querySelectorAll("[data-rdis]").forEach(b=>b.onclick=async()=>{settings={...settings,dismissed:[...(settings.dismissed||[]),b.dataset.rdis]};await saveSettings();render()});
+}
+
+/* ---------- CV + export ---------- */
+function buildCV(r){
+  const P=profile, h=esc, lines=t=>String(t||"").split("\n").map(x=>x.trim()).filter(Boolean);
+  let skills=P.skills.split(",").map(x=>x.trim()).filter(Boolean);
+  if(r&&r.hit.length){const hl=r.hit.map(x=>x.toLowerCase());skills=[...skills.filter(s=>hl.some(k=>s.toLowerCase().includes(k)||k.includes(s.toLowerCase()))),...skills.filter(s=>!hl.some(k=>s.toLowerCase().includes(k)||k.includes(s.toLowerCase())))]}
+  const headline=r?(r.angle==="dev"?"Full-Stack Developer (Next.js, React, Python, PostgreSQL) with banking domain experience":r.bank?"Data & MIS Analyst with hands-on banking operations experience":"Data Analyst (SQL, Python, Power BI) who builds production tools"):P.headline;
+  const proj=r?projectLine(r):lines(P.projects);
+  const exp=lines(P.experience);
+  const contact=[P.phone,P.email,P.location,P.links].filter(Boolean).map(h).join(" &nbsp;|&nbsp; ");
+  const li=a=>a.map(x=>{const i=x.indexOf(":");return i>0&&i<60?`<li><b>${h(x.slice(0,i))}</b>${h(x.slice(i))}</li>`:`<li>${h(x)}</li>`}).join("");
+  return `<html><head><meta charset="utf-8"><title>${h(P.name)} CV</title><style>
+body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111;margin:0}h1{font-size:20pt;margin:0}h2{font-size:12pt;border-bottom:1px solid #999;margin:14pt 0 4pt;text-transform:uppercase;letter-spacing:.5pt}p{margin:2pt 0}ul{margin:2pt 0 0 16pt;padding:0}li{margin:0 0 3pt}.c{color:#444;font-size:10pt}</style></head><body>
+<h1>${h(P.name)}</h1><p><b>${h(headline)}</b></p><p class="c">${contact}</p>
+<h2>Summary</h2><p>${h(P.summary)}</p>
+<h2>Skills</h2><p>${skills.map(h).join(" · ")}</p>
+<h2>Experience</h2>${exp.length?`<p><b>${h(exp[0])}</b></p><ul>${li(exp.slice(1))}</ul>`:""}
+<h2>Projects</h2><ul>${li(proj)}</ul>
+<h2>Education &amp; training</h2><ul>${li(lines(P.education))}</ul>
+<p class="c" style="margin-top:10pt">Available to join: ${h(P.notice)}</p>
+</body></html>`;
+}
+function cvWarn(){const miss=Object.values(profile).join(" ").match(/\[[^\]]+\]/g);return miss?"Your profile still has blanks: "+[...new Set(miss)].join(", ")+". Fill them in My profile before sending this CV.":""}
+async function saveFile(filename,data,btn,note){
+  if(!downloads)return; const o=btn.textContent; btn.disabled=true;
+  try{await downloads.save({filename,data});btn.textContent="Saved";if(note)note()}catch(e){btn.textContent=e&&e.code==="cancelled"?o:"Couldn't save"}
+  setTimeout(()=>{btn.textContent=o;btn.disabled=false},1600)}
+$("t-cv").onclick=()=>{const r=runTailor(); const c=($("t-company").value.trim()||"job").replace(/[^A-Za-z0-9]+/g,"_");
+  const w=cvWarn(); if(w)$("t-ainote").textContent=w;
+  saveFile(`Shashank_Upadhyay_CV_${c}.doc`,new Blob([buildCV(r)],{type:"application/msword"}),$("t-cv"))};
+$("p-cv").onclick=()=>{const w=cvWarn();$("p-warn").hidden=!w;$("p-warn").textContent=w;
+  saveFile("Shashank_Upadhyay_CV.doc",new Blob([buildCV(null)],{type:"application/msword"}),$("p-cv"))};
+$("exportCsv").onclick=()=>{const cols=["company","role","status","applied","next","source","location","link","contact","notes"];
+  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const csv=[cols.join(","),...apps.map(a=>cols.map(c=>q(a[c])).join(","))].join("\n");
+  saveFile(`job_applications_${todayStr()}.csv`,csv,$("exportCsv"))};
+
+/* ---------- notifications (bell) ---------- */
+const DEFAULT_TOPIC=""; const LOADED_AT=Date.now();
+let serverNotifs=[], ntfyNotifs=[], notifInit=false, lastSeenIds=new Set();
+const readSet=new Set((()=>{try{return JSON.parse(localStorage.getItem("jd-read")||"[]")}catch(e){return []}})());
+const saveRead=()=>{try{localStorage.setItem("jd-read",JSON.stringify([...readSet].slice(-500)))}catch(e){}};
+const topic=()=>{try{return localStorage.getItem("jd-ntfy")||DEFAULT_TOPIC}catch(e){return DEFAULT_TOPIC}};
+function reminders(){const t=todayStr(),tm=addDays(t,1),out=[];
+  apps.filter(a=>a.next&&(a.next===t||a.next===tm)&&a.status!=="Rejected").forEach(a=>out.push({id:`rem-next-${a.id}-${a.next}`,time:new Date(a.next+"T08:00:00").getTime()-86400000*(a.next===tm?1:0),priority:5,title:`${a.status==="Interview"?"Interview":"Date"} ${a.next===t?"today":"tomorrow"}: ${a.company}`,message:`${a.role}. Open the prep sheet in your email and confirm the time.`,tab:"today"}));
+  const due=apps.filter(a=>a.status==="Applied"&&a.applied&&daysBetween(a.applied,t)>=7&&daysBetween(a.applied,t)<=30);
+  if(due.length)out.push({id:`rem-fu-${t}-${due.length}`,time:new Date(t+"T09:00:00").getTime(),priority:3,title:`${due.length} follow-up${due.length===1?"":"s"} due`,message:due.slice(0,4).map(a=>a.company).join(", "),tab:"today"});
+  const todo=queue.filter(q=>q.status==="todo").length;
+  if(todo)out.push({id:`rem-q-${t}-${todo}`,time:new Date(t+"T09:05:00").getTime(),priority:3,title:`${todo} job${todo===1?"":"s"} ready for you to apply`,message:"Open each one, apply, then tap Done.",tab:"today"});
+  return out}
+function allNotifs(){const m=new Map();[...serverNotifs,...ntfyNotifs,...reminders()].forEach(n=>{if(n&&n.id&&!m.has(n.id))m.set(n.id,n)});
+  return [...m.values()].sort((a,b)=>(b.time||0)-(a.time||0)).slice(0,60)}
+const ago=ms=>{const d=(Date.now()-ms)/60000;return d<1?"just now":d<60?`${d|0} min ago`:d<1440?`${(d/60)|0} h ago`:new Date(ms).toLocaleDateString("en-IN",{day:"numeric",month:"short"})};
+function renderNotifs(){
+  const list=allNotifs(), unread=list.filter(n=>!readSet.has(n.id));
+  $("bellCount").hidden=!unread.length; $("bellCount").textContent=unread.length>99?"99+":unread.length;
+  $("bellBtn").setAttribute("aria-label",`Notifications, ${unread.length} unread`);
+  $("notifList").innerHTML=list.length?list.map(n=>`<button class="nitem ${readSet.has(n.id)?"":"unread"} p${n.priority||3}" data-nid="${esc(n.id)}"><b>${esc(n.title||"Update")}</b><span>${esc(n.message||"")}</span><span>${ago(n.time||Date.now())}</span></button>`).join(""):'<p class="note" style="padding:14px;margin:0">No notifications yet. Your assistant\'s updates, interview alerts and reminders will appear here.</p>';
+  document.querySelectorAll("[data-nid]").forEach(b=>b.onclick=()=>{const n=list.find(x=>x.id===b.dataset.nid);readSet.add(b.dataset.nid);saveRead();renderNotifs();
+    if(n&&n.tab){showTab(n.tab);$("notifPanel").hidden=true;$("bellBtn").setAttribute("aria-expanded","false")}});
+  // announce new ones (not on first load)
+  const fresh=list.filter(n=>!lastSeenIds.has(n.id)&&!readSet.has(n.id)&&(String(n.id).startsWith("rem-")||(n.time||0)>=LOADED_AT-120000));
+  if(notifInit&&fresh.length){const top=fresh[0];toast(top.title+(top.message?" – "+top.message.split("\n")[0]:""),(top.priority||3)>=5);
+    $("bellBtn").classList.remove("ring");void $("bellBtn").offsetWidth;$("bellBtn").classList.add("ring");
+    fresh.filter(n=>(n.priority||3)>=4||IS_APP).forEach(sysNotify)}
+  list.forEach(n=>lastSeenIds.add(n.id)); notifInit=true;
+}
+let toastT=null;
+function toast(text,urgent){const t=$("toast");t.textContent=text;t.className="toast"+(urgent?" urgent":"");t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,urgent?9000:5000);
+  if(urgent)beep()}
+function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();[0,.25].forEach(d=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.setValueAtTime(.001,c.currentTime+d);g.gain.exponentialRampToValueAtTime(.2,c.currentTime+d+.02);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d+.2);o.connect(g).connect(c.destination);o.start(c.currentTime+d);o.stop(c.currentTime+d+.22)})}catch(e){}}
+async function sysNotify(n){try{if(!("Notification" in window)||Notification.permission!=="granted")return;
+  const opts={body:n.message||"",tag:n.id,icon:"icon-192.png",badge:"icon-192.png",requireInteraction:(n.priority||3)>=5,data:{tab:n.tab||"today"}};
+  const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration(); if(reg)reg.showNotification(n.title||"Job Desk",opts); else new Notification(n.title||"Job Desk",opts)}catch(e){}}
+$("bellBtn").onclick=e=>{e.stopPropagation();const p=$("notifPanel");p.hidden=!p.hidden;$("bellBtn").setAttribute("aria-expanded",String(!p.hidden))};
+document.addEventListener("click",e=>{const p=$("notifPanel");if(!p.hidden&&!p.contains(e.target)&&e.target!==$("bellBtn")){p.hidden=true;$("bellBtn").setAttribute("aria-expanded","false")}});
+$("notifRead").onclick=()=>{allNotifs().forEach(n=>readSet.add(n.id));saveRead();renderNotifs()};
+async function askPermission(){try{const r=await Notification.requestPermission();$("notifAlerts").hidden=r==="granted";
+    $("ntfy-note").hidden=false;$("ntfy-note").textContent=r==="granted"?"Alerts are on for this device.":"Alerts were blocked. Allow notifications for this app in your phone or browser settings.";
+    if(r==="granted")setupBackground()}catch(e){}}
+$("notifAlerts").onclick=askPermission; $("ntfy-perm").onclick=askPermission;
+// installed app: read the ntfy topic
+async function pollNtfy(){if(!IS_APP)return;const tp=topic();if(!tp)return;
+  try{const r=await fetch(`https://ntfy.sh/${encodeURIComponent(tp)}/json?poll=1&since=7d`);const txt=await r.text();
+    ntfyNotifs=txt.split("\n").filter(Boolean).map(l=>{try{return JSON.parse(l)}catch(e){return null}}).filter(m=>m&&m.event==="message")
+      .map(m=>({id:"ntfy-"+m.id,time:(m.time||0)*1000,priority:m.priority||3,title:m.title||"Job hunt",message:m.message||"",tab:"today"}));
+    renderNotifs()}catch(e){}}
+async function setupBackground(){try{const reg=await navigator.serviceWorker.ready;
+    if(reg.active)reg.active.postMessage({type:"config",topic:topic()});
+    if("periodicSync" in reg){try{await reg.periodicSync.register("jobdesk-check",{minInterval:60*60*1000})}catch(e){}}}catch(e){}}
+function initNotifs(){
+  if(IS_APP){$("ntfyPanel").hidden=false;$("ntfy-topic").value=topic();
+    $("notifAlerts").hidden=!("Notification" in window)||Notification.permission==="granted";
+    if("Notification" in window&&Notification.permission==="granted")setupBackground();
+    pollNtfy();setInterval(pollNtfy,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)pollNtfy()});}
+  renderNotifs();
+}
+$("ntfy-save").onclick=()=>{const v=$("ntfy-topic").value.trim();try{localStorage.setItem("jd-ntfy",v)}catch(e){}$("ntfy-note").hidden=false;$("ntfy-note").textContent="Saved.";setupBackground();pollNtfy()};
+
+/* ---------- backup ---------- */
+$("bk-save").onclick=()=>{const data=JSON.stringify({app:"job-desk",version:1,exported:new Date().toISOString(),apps,profile,settings},null,1);
+  saveFile(`job-desk-backup-${todayStr()}.json`,data,$("bk-save"),()=>{$("bk-note").hidden=false;$("bk-note").textContent=`Backed up ${apps.length} applications.`})};
+$("bk-file").onchange=async e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const note=$("bk-note"); note.hidden=false;
+  try{const j=JSON.parse(await f.text()); if(!j||j.app!=="job-desk"||!Array.isArray(j.apps))throw new Error("not a Job Desk backup");
+    const have=new Map(apps.map(a=>[a.id,a])); let n=0,u=0;
+    for(const a of j.apps){if(!a||!a.id)continue; const cur=have.get(a.id);
+      if(!cur){await saveApp({...a}); n++}
+      else if((a.updatedAt||0)>(cur.updatedAt||0)){await saveApp({...cur,...a}); u++}}
+    if(j.profile&&typeof j.profile==="object")await saveProfile({...DEFAULT_PROFILE,...j.profile}); fillProfile();
+    if(j.settings&&typeof j.settings==="object"){settings={...DEFAULT_SETTINGS,...j.settings,dismissed:[...new Set([...(settings.dismissed||[]),...(j.settings.dismissed||[])])]};await saveSettings()}
+    render(); note.textContent=`Restored ${n} new application${n===1?"":"s"}`+(u?`, updated ${u}`:"")+" and your profile.";
+  }catch(err){note.textContent="That file couldn't be restored: "+(err.message||"unreadable")+". Pick a job-desk-backup .json file."}
+  e.target.value="";};
+
+/* ---------- util ---------- */
+function copy(text,btn){const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1400)};
+  try{navigator.clipboard.writeText(text).then(done,()=>fallback())}catch(e){fallback()}
+  function fallback(){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){btn.textContent="Select and copy"}ta.remove()}}
+
+try{const t=sessionStorage.getItem("jd-tab");if(t)showTab(t)}catch(e){}
+boot(); initNotifs();
+})();
+</script>
+
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+</script>
+</body>
+</html>
