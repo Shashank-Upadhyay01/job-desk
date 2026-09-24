@@ -137,6 +137,13 @@ td select{padding:4px 6px;width:auto;font-size:13px}
 .nitem b{font-size:14px} .nitem span{font-size:13px;color:var(--muted);white-space:pre-wrap}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;max-width:calc(100vw - 32px);box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14px}
 .toast.urgent{background:var(--bad);color:#fff}
+.range{display:grid;gap:6px}
+.range input[type=range]{padding:0;border:0;accent-color:var(--accent);height:28px}
+.range .val{font:600 22px var(--mono)}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;display:grid;gap:8px;justify-items:center}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.switch{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--ink)}
+.switch input{width:auto}
 .banner{padding:10px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:13px;margin-bottom:14px}
 @media (max-width:480px){.stats{grid-template-columns:repeat(2,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -173,6 +180,12 @@ td select{padding:4px 6px;width:auto;font-size:13px}
     <div class="panel" id="asstPanel" hidden style="margin-bottom:16px">
       <div class="row spread"><h3>Assistant</h3><div class="row"><span class="note" id="asstState"></span><button class="small" id="asstPause">Pause</button></div></div>
       <div class="out" id="asstReport" style="margin-top:10px;max-height:260px;overflow:auto"></div>
+    </div>
+    <div class="panel" id="sendPanel" hidden style="margin-bottom:16px">
+      <div class="row spread"><div><h3 id="sendTitle">Applications ready to send</h3><p class="note" style="margin:4px 0 0">Written by your assistant, each with a CV made for that job, waiting in Gmail Drafts. One tap sends them all.</p></div>
+        <button class="primary" id="sendAll">Send all now</button></div>
+      <div class="list" id="sendList"></div>
+      <p class="note" id="sendNote" style="margin:8px 0 0" hidden></p>
     </div>
     <div class="panel" id="queuePanel" hidden style="margin-bottom:16px">
       <h3>Ready for you to apply</h3>
@@ -310,6 +323,33 @@ td select{padding:4px 6px;width:auto;font-size:13px}
 
   <!-- PROFILE -->
   <section id="tab-profile" hidden>
+    <div class="panel grid" style="margin-bottom:16px">
+      <div><h2>Your CV</h2><p class="note" style="margin:4px 0 0">Upload your CV (PDF, Word or text). The AI reads it, fills in your profile and works out which jobs you should apply for.</p></div>
+      <div class="drop" id="cvDrop">
+        <b id="cvName">No CV uploaded yet</b>
+        <span class="note" id="cvMeta">Drop the file here, or choose it</span>
+        <label class="btn" for="cvFile" style="position:relative;display:inline-flex;color:var(--ink);font-size:14px">Choose CV file<input id="cvFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="position:absolute;width:1px;height:1px;opacity:0"></label>
+      </div>
+      <div id="cvResult"></div>
+    </div>
+    <div class="panel grid" style="margin-bottom:16px">
+      <div class="row spread"><div><h2>Which jobs to apply for</h2><p class="note" style="margin:4px 0 0">Your assistant only applies to jobs that pass all of these.</p></div><button class="primary" id="pref-save">Save preferences</button></div>
+      <div class="range"><label for="pref-salary">Minimum monthly salary</label>
+        <div class="row spread"><span class="val" id="pref-salary-val">₹25,000</span><span class="note" id="pref-salary-yr">₹3.0 lakh a year</span></div>
+        <input id="pref-salary" type="range" min="0" max="150000" step="1000" value="25000">
+        <div class="row spread note"><span>Any</span><span>₹1.5 lakh</span></div></div>
+      <label class="switch"><input type="checkbox" id="pref-nosalary"> Skip jobs that don't say the salary</label>
+      <div class="range"><label for="pref-match">How closely your skills must match</label>
+        <div class="row spread"><span class="val" id="pref-match-val">70%</span><span class="note" id="pref-match-help">Most of the required skills</span></div>
+        <input id="pref-match" type="range" min="40" max="100" step="5" value="70"></div>
+      <div class="form-grid">
+        <label>Roles to apply for (one per line)<textarea id="pref-roles" rows="5"></textarea></label>
+        <label>Roles to never apply for (one per line)<textarea id="pref-avoid" rows="5" placeholder="e.g. Sales Executive&#10;Telecaller&#10;MERN / MongoDB developer"></textarea></label>
+        <label>Cities (one per line; include Remote if you want it)<textarea id="pref-locs" rows="5"></textarea></label>
+      </div>
+      <label>Most years of experience a job may ask for<input id="pref-exp" type="number" min="0" max="15" style="max-width:120px"></label>
+      <p class="note" id="pref-note" style="margin:0" hidden></p>
+    </div>
     <div class="panel grid">
       <div class="row spread"><h2>My profile</h2><div class="row"><button id="p-cv" hidden>Download my CV</button><button class="primary" id="p-save">Save profile</button></div></div>
       <p class="note" id="p-warn" style="margin:0;color:var(--warn)" hidden></p>
@@ -414,7 +454,11 @@ const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);r
 const daysBetween=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000);
 const fmt=s=>s?new Date(s+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"–";
 
-const DEFAULT_SETTINGS={gmailLastSync:"",replies:[],dismissed:[],dailyTarget:10,automationPaused:false};
+const DEFAULT_PREFS={minSalary:25000,skipNoSalary:false,minMatch:70,maxExpYears:5,
+  targetRoles:["Data Analyst","MIS Executive / MIS Analyst","Power BI Developer","Business Analyst (banking/NBFC/fintech)","Operations Analyst (banking/NBFC/fintech)","Junior Full-Stack Developer (React/Next.js/Python)","Python Developer","Accounts / Finance Analyst"],
+  avoidRoles:["Sales / telecalling / field sales","MERN or MongoDB/Node-only developer","Data entry operator","Unpaid internship"],
+  locations:["Lucknow","Noida","Delhi NCR","Varanasi","Kanpur","Remote (India)"]};
+const DEFAULT_SETTINGS={gmailLastSync:"",replies:[],dismissed:[],dailyTarget:10,automationPaused:false,prefs:DEFAULT_PREFS};
 let settings={...DEFAULT_SETTINGS};
 let apps=[]; let profile={...DEFAULT_PROFILE}; let db=null; let editingId=null;
 
@@ -469,11 +513,35 @@ document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{showTab(b.datas
 
 /* ---------- today ---------- */
 function isSent(a){return a.applied&&a.status!=="Saved"}
-function render(){renderToday();renderTable();renderReplies();renderAssistant();if(notifInit)renderNotifs()}
+function render(){renderToday();renderTable();renderReplies();renderAssistant();if(notifInit)renderNotifs();if(window.__prefsReady)fillPrefs()}
 let queue=[], report=null;
 $("dailyTarget").onchange=async()=>{const v=Math.max(1,Math.min(100,parseInt($("dailyTarget").value,10)||10));if(v===TGT()&&+settings.dailyTarget===v)return;settings={...settings,dailyTarget:v};await saveSettings();render();setSave(`Daily target set to ${v}`)};
 $("asstPause").onclick=async()=>{settings={...settings,automationPaused:!settings.automationPaused};await saveSettings();render()};
+function readyToSend(){return apps.filter(a=>a.applyMethod==="email"&&a.status==="Saved"&&a.draftId)}
+function renderSend(){
+  const list=readyToSend(); const on=!!db&&!!mcp&&list.length>0;
+  $("sendPanel").hidden=!on; if(!on)return;
+  $("sendTitle").textContent=`${list.length} application${list.length===1?"":"s"} ready to send`;
+  $("sendAll").textContent=list.length>1?`Send all ${list.length} now`:"Send now";
+  $("sendList").innerHTML=list.map(a=>`<div class="item"><div style="min-width:0;flex:1 1 240px"><b>${esc(a.company)}</b> <span class="muted">· ${esc(a.role)}</span><div class="note">${esc(a.location||"")}${a.hrEmail?" · to "+esc(a.hrEmail):""}</div></div>
+    <div class="row">${/^https?:\/\//.test(a.link||"")?`<a class="btn" style="padding:4px 10px;font-size:13px" href="${esc(a.link)}" target="_blank" rel="noopener">Job post</a>`:""}<button class="small" data-send="${a.id}">Send</button><button class="small" data-nosend="${a.id}">Skip</button></div></div>`).join("");
+  document.querySelectorAll("[data-send]").forEach(b=>b.onclick=()=>sendDrafts([apps.find(a=>a.id===b.dataset.send)],b));
+  document.querySelectorAll("[data-nosend]").forEach(b=>b.onclick=()=>{const a=apps.find(x=>x.id===b.dataset.nosend);if(a)saveApp({...a,status:"Rejected",notes:(a.notes||"")+"\nSkipped by you – draft not sent (delete it in Gmail Drafts)."})});
+}
+async function sendDrafts(list,btn){
+  list=list.filter(Boolean); if(!list.length||!mcp)return;
+  const note=$("sendNote"); note.hidden=false; const all=$("sendAll"); all.disabled=true; if(btn)btn.disabled=true;
+  let ok=0, fail=[];
+  for(const a of list){note.textContent=`Sending ${ok+fail.length+1} of ${list.length}: ${a.company}…`;
+    try{await mcp.callTool(GM,"send_message",{draftId:a.draftId});
+      await saveApp({...a,status:"Applied",applied:todayStr(),notes:(a.notes||"").replace(/Draft in Gmail[^.]*\.?/,"").trim()+`\nSent from Job Desk on ${todayStr()}.`});ok++}
+    catch(e){fail.push(`${a.company} (${e&&e.code==="tool_error"?"the draft is missing or was already sent – check Gmail":gmailErr(e)})`)}}
+  note.textContent=`Sent ${ok} application${ok===1?"":"s"}.`+(fail.length?` Couldn't send: ${fail.join("; ")}.`:" They now count toward today's target.");
+  all.disabled=false; if(ok)toast(`Sent ${ok} application${ok===1?"":"s"}`,false);
+}
+$("sendAll").onclick=()=>sendDrafts(readyToSend());
 function renderAssistant(){
+  renderSend();
   const on=!!db&&(queue.length||report);
   $("asstPanel").hidden=!(db&&report); $("queuePanel").hidden=!(db&&queue.some(q=>q.status==="todo"));
   if(report){$("asstReport").textContent=report.text||"";}
@@ -833,6 +901,7 @@ async function saveSettings(){if(db){try{await db.doc("settings/main").set(setti
 async function initGmail(){
   try{mcp=window.claude&&window.claude.use?await window.claude.use("mcp"):null}catch(e){mcp=null}
   document.querySelectorAll(".gm-sync").forEach(b=>{b.hidden=!mcp;b.onclick=()=>syncGmail(true)});
+  renderSend();
   if(!mcp)return;
   if(settings.gmailLastSync){setGm("Gmail last checked "+fmt(settings.gmailLastSync)+".");syncGmail(false)}
   else setGm("Tap Sync from Gmail to log the applications you've already sent. It reads only job-application emails.");
@@ -1022,6 +1091,84 @@ function initNotifs(){
 }
 $("ntfy-save").onclick=()=>{const v=$("ntfy-topic").value.trim();try{localStorage.setItem("jd-ntfy",v)}catch(e){}$("ntfy-note").hidden=false;$("ntfy-note").textContent="Saved.";setupBackground();pollNtfy()};
 
+/* ---------- job preferences + CV ---------- */
+const inr=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const prefs=()=>({...DEFAULT_PREFS,...(settings.prefs||{})});
+const lines=t=>String(t||"").split("\n").map(x=>x.trim()).filter(Boolean);
+function salaryLabel(){const v=+$("pref-salary").value;$("pref-salary-val").textContent=v?inr(v)+" / month":"Any salary";$("pref-salary-yr").textContent=v?`₹${(v*12/100000).toFixed(1)} lakh a year`:"No minimum"}
+function matchLabel(){const v=+$("pref-match").value;$("pref-match-val").textContent=v+"%";$("pref-match-help").textContent=v>=90?"Almost every required skill":v>=70?"Most of the required skills":v>=55?"More than half of the required skills":"About half – more jobs, weaker fit"}
+$("pref-salary").oninput=salaryLabel; $("pref-match").oninput=matchLabel;
+function fillPrefs(){const p=prefs();const f=(id,v)=>{if(document.activeElement!==$(id))$(id).value=v};
+  f("pref-salary",p.minSalary);f("pref-match",p.minMatch);f("pref-roles",p.targetRoles.join("\n"));f("pref-avoid",p.avoidRoles.join("\n"));f("pref-locs",p.locations.join("\n"));f("pref-exp",p.maxExpYears);
+  $("pref-nosalary").checked=!!p.skipNoSalary; salaryLabel(); matchLabel();
+  const cv=settings.cv||{}; $("cvName").textContent=cv.fileName||"No CV uploaded yet"; $("cvMeta").textContent=cv.fileName?`Read on ${fmt(cv.uploaded)} · ${(cv.words||0).toLocaleString("en-IN")} words`:"Drop the file here, or choose it";}
+$("pref-save").onclick=async()=>{const p={minSalary:+$("pref-salary").value,skipNoSalary:$("pref-nosalary").checked,minMatch:+$("pref-match").value,maxExpYears:Math.max(0,+$("pref-exp").value||0),
+    targetRoles:lines($("pref-roles").value),avoidRoles:lines($("pref-avoid").value),locations:lines($("pref-locs").value)};
+  if(!p.targetRoles.length){$("pref-note").hidden=false;$("pref-note").textContent="Add at least one role to apply for.";return}
+  settings={...settings,prefs:p};await saveSettings();$("pref-note").hidden=false;
+  $("pref-note").textContent=`Saved. From the next run, only ${p.targetRoles.length} role type${p.targetRoles.length===1?"":"s"}, paying at least ${p.minSalary?inr(p.minSalary)+"/month":"any salary"}, with a ${p.minMatch}% skill match.`;renderFindRoles()};
+function renderFindRoles(){const r=prefs().targetRoles;if(!r.length)return;const cur=$("q-role").value;$("q-role").innerHTML=r.map(x=>`<option>${esc(x.replace(/\s*\(.*\)\s*/,"").split(" / ")[0])}</option>`).join("");if([...$("q-role").options].some(o=>o.value===cur))$("q-role").value=cur;renderLinks()}
+function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`))return res();const t=document.createElement("script");t.src=src;t.onload=res;t.onerror=()=>rej(new Error("couldn't load the file reader (are you offline?)"));document.head.appendChild(t)})}
+async function readCv(file){
+  const name=file.name.toLowerCase();
+  if(name.endsWith(".txt")||file.type==="text/plain")return await file.text();
+  if(name.endsWith(".pdf")||file.type==="application/pdf"){
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
+    const lib=window.pdfjsLib; lib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const pdf=await lib.getDocument({data:await file.arrayBuffer()}).promise; let out=[];
+    for(let i=1;i<=Math.min(pdf.numPages,8);i++){const tc=await (await pdf.getPage(i)).getTextContent();let line="",lastY=null;const rows=[];
+      for(const it of tc.items){const y=Math.round(it.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>3){rows.push(line);line=""}line+=(line&&!line.endsWith(" ")?" ":"")+it.str;lastY=y}rows.push(line);out.push(rows.join("\n"))}
+    return out.join("\n\n")}
+  if(name.endsWith(".docx")){await loadScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js");
+    return (await window.mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()})).value}
+  throw new Error("use a PDF, Word (.docx) or .txt file");
+}
+async function handleCv(file){
+  const box=$("cvResult"); if(!file)return;
+  if(file.size>8*1024*1024){box.innerHTML='<p class="note">That file is over 8 MB. Export a smaller PDF and try again.</p>';return}
+  $("cvName").textContent=file.name;$("cvMeta").textContent="Reading your CV…";box.innerHTML="";
+  let text="";try{text=(await readCv(file)).replace(/[ \t]+/g," ").trim()}catch(e){$("cvMeta").textContent="Couldn't read it: "+e.message;return}
+  if(text.length<200){$("cvMeta").textContent="Couldn't find text in this file. If it's a scanned image, upload a Word or text version instead.";return}
+  const words=text.split(/\s+/).length;
+  settings={...settings,cv:{fileName:file.name,uploaded:todayStr(),words,text:text.slice(0,20000)}};await saveSettings();
+  $("cvMeta").textContent=`Read ${words.toLocaleString("en-IN")} words. Asking the AI what it means for your job search…`;
+  if(aiCfg().provider==="none"){$("cvMeta").textContent=`Saved (${words.toLocaleString("en-IN")} words). Pick an AI in AI settings to have it fill your profile and suggest roles.`;return}
+  try{const j=await askAI(`Read this CV of a job seeker in India. Extract his profile exactly as written (never invent anything) and judge which jobs he is genuinely qualified for right now.
+Return JSON: {"name":"","email":"","phone":"","location":"","headline":"one line","summary":"2-3 sentences, factual","skills":"comma-separated, only skills evidenced in the CV",
+"experience":"first line: Employer, City | Titles | Start – End; then one line per achievement","projects":"one line per project, 'Name: what it does; tech'","education":"one line per qualification",
+"yearsExperience":0,"targetRoles":["6-10 role titles he should apply for, most suitable first"],"avoidRoles":["roles he should NOT apply for because key skills are missing"],
+"salaryAdvice":{"min":0,"typical":0,"note":"realistic monthly salary range in INR for these roles in UP/NCR for his experience, one sentence"},"gaps":["top 3 skills that would unlock better roles"]}
+
+CV
+${text.slice(0,15000)}`,{json:true,title:"Read my CV"});
+    renderCvResult(j);
+  }catch(e){$("cvMeta").textContent=`Saved (${words.toLocaleString("en-IN")} words). The AI step failed: ${aiErr(e)}`}
+}
+function renderCvResult(j){
+  const box=$("cvResult"); const L=a=>(Array.isArray(a)?a:[]).map(x=>`<span class="chip">${esc(x)}</span>`).join("");
+  const sa=j.salaryAdvice||{};
+  $("cvMeta").textContent="Read and understood. Check the suggestions below.";
+  box.innerHTML=`<div class="grid" style="gap:12px">
+    <div><h3>Roles that fit you</h3><div class="chips" style="margin-top:6px">${L(j.targetRoles)}</div></div>
+    <div><h3>Roles to avoid for now</h3><div class="chips" style="margin-top:6px">${L(j.avoidRoles)}</div></div>
+    ${sa.typical?`<p style="margin:0"><b>Realistic salary:</b> ${inr(sa.min||0)} – ${inr(sa.typical)} a month. <span class="note">${esc(sa.note||"")}</span></p>`:""}
+    ${Array.isArray(j.gaps)&&j.gaps.length?`<p class="note" style="margin:0">Skills that would unlock better roles: ${j.gaps.map(esc).join(", ")}</p>`:""}
+    <div class="row"><button class="primary" id="cvUseAll">Use these roles and update my profile</button><button id="cvUseRoles">Use the roles only</button></div>
+    <p class="note" id="cvUseNote" style="margin:0" hidden></p></div>`;
+  const useRoles=async()=>{const p={...prefs()};if(Array.isArray(j.targetRoles)&&j.targetRoles.length)p.targetRoles=j.targetRoles.slice(0,12);
+    if(Array.isArray(j.avoidRoles))p.avoidRoles=[...new Set([...p.avoidRoles,...j.avoidRoles])].slice(0,15);
+    if(j.yearsExperience!=null)p.maxExpYears=Math.max(1,Math.round(+j.yearsExperience)+2);
+    if(sa.min&&(!settings.prefs||!settings.prefs.minSalary))p.minSalary=Math.round(sa.min/1000)*1000;
+    settings={...settings,prefs:p};await saveSettings();fillPrefs();renderFindRoles()};
+  $("cvUseRoles").onclick=async()=>{await useRoles();$("cvUseNote").hidden=false;$("cvUseNote").textContent="Roles saved to your job preferences below."};
+  $("cvUseAll").onclick=async()=>{await useRoles();const np={...profile};PF.forEach(k=>{const v=j[k];if(typeof v==="string"&&v.trim()&&!/^\[.*\]$/.test(v.trim()))np[k]=v.trim()});
+    await saveProfile(np);fillProfile();$("cvUseNote").hidden=false;$("cvUseNote").textContent="Profile and job preferences updated from your CV. Check the fields below once."};
+}
+$("cvFile").onchange=e=>handleCv(e.target.files&&e.target.files[0]);
+["dragover","dragenter"].forEach(ev=>$("cvDrop").addEventListener(ev,e=>{e.preventDefault();$("cvDrop").classList.add("over")}));
+["dragleave","drop"].forEach(ev=>$("cvDrop").addEventListener(ev,e=>{e.preventDefault();$("cvDrop").classList.remove("over")}));
+$("cvDrop").addEventListener("drop",e=>handleCv(e.dataTransfer.files&&e.dataTransfer.files[0]));
+
 /* ---------- backup ---------- */
 $("bk-save").onclick=()=>{const data=JSON.stringify({app:"job-desk",version:1,exported:new Date().toISOString(),apps,profile,settings},null,1);
   saveFile(`job-desk-backup-${todayStr()}.json`,data,$("bk-save"),()=>{$("bk-note").hidden=false;$("bk-note").textContent=`Backed up ${apps.length} applications.`})};
@@ -1043,7 +1190,7 @@ function copy(text,btn){const done=()=>{const o=btn.textContent;btn.textContent=
   function fallback(){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){btn.textContent="Select and copy"}ta.remove()}}
 
 try{const t=sessionStorage.getItem("jd-tab");if(t)showTab(t)}catch(e){}
-boot(); initNotifs();
+boot(); initNotifs(); window.__prefsReady=true; fillPrefs(); renderFindRoles();
 })();
 </script>
 

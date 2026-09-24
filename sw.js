@@ -1,4 +1,4 @@
-const CACHE="job-desk-v5";
+const CACHE="job-desk-v6";
 const CORE=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","icon-maskable-512.png","apple-touch-icon.png"];
 const CFG_KEY="./__jobdesk_cfg";
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
